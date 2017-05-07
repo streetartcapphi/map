@@ -1,0 +1,37 @@
+
+
+<html>
+    <head>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js" ></script>
+
+    </head>
+    <body>
+
+        <div id="test" style="position:absolute;background-color:red;">
+            content
+        </div>
+        <script>
+            var $box = document.getElementById("test");
+            var o = new Object();
+            o.x = 0;
+           console.log(o); 
+var tween = TweenLite.to(o, 2, {
+ x: 100,
+ ease: Power1.easeInOut,
+ delay: 2
+ /*,
+ onUpdate: function() {
+    console.log(this);
+ }*/
+});
+      /*
+        setInterval(function() {
+            console.log(o);
+        }, 100); 
+
+        */
+        </script>
+    </body>
+
+
+</html>

@@ -1,0 +1,138 @@
+
+<html>
+<body onload="loaded()">
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js" ></script>
+
+    <div id="map" style="width:100%;height:100%"></div>
+
+    <script>
+
+function loaded() {
+
+// // Load them google fonts before starting...!
+window.WebFontConfig = {
+    google: {
+        families: ['Snippet', 'Arvo:700italic', 'Podkova:700']
+    },
+
+    active: function() {
+        // do something
+        init();
+    }
+};
+
+// include the web-font loader script
+/* jshint ignore:start */
+(function() {
+    var wf = document.createElement('script');
+    wf.src = ('https:' === document.location.protocol ? 'https' : 'http') +
+        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+})();
+/* jshint ignore:end */
+}
+function init() {
+ PIXI.loader
+        .add('desyrel', 'required/assets/desyrel.xml')
+        .load(createApp);
+
+}
+        function createApp() {
+
+            var app = new PIXI.Application(800,600);
+            var e = document.getElementById("map");
+            e.appendChild(app.view);
+
+            app.start();
+
+            var sprite = PIXI.Sprite.fromImage("myImage2.jpg");
+            sprite.x = Math.random()*100;
+            sprite.y = -Math.random()*100 - 100;
+            sprite.anchor.set(0.5);
+            
+            var blurFilter1 = new PIXI.filters.BlurFilter();
+            sprite.filters = [ blurFilter1 ];
+            
+            var o = {};
+            o.setScale = function(s) { sprite.scale.set(s); };
+            o.getScale = function() { return sprite.scale.x; };
+            o.setScale(1);
+
+// create some white text using the Snippet webfont
+    var textSample = new PIXI.Text('Pixi.js can has\n multiline text!', {
+        fontFamily: 'Arial',
+        fontSize: 12,
+        fill: 'white', 
+        align: 'left' 
+    });
+            app.stage.addChild(textSample);
+
+    // bubble
+var infos = new PIXI.Graphics();
+infos.beginFill(0xcccccc);
+infos.moveTo(0,0);
+infos.lineStyle(2, 0xffffff, 1);
+infos.lineTo(100,100);
+infos.lineTo(0,100);
+infos.lineTo(0,0);
+
+infos.endFill();
+infos.x = 300;
+//infos.alpha = .5;
+            app.stage.addChild(infos);
+
+
+            window.sprite = sprite;
+            app.stage.addChild(sprite);
+            app.render();
+            var tween = TweenLite.to(sprite,2, {
+                x:100,
+                ease:Elastic.easeOut
+            });
+            TweenLite.to(sprite,1, {
+                y:100,
+                ease:Bounce.easeOut
+            });
+
+            TweenLite.to(o, 1, {
+                setScale:0.3,
+                ease:Power0.easeOut
+            });
+
+
+
+            function animate() {
+               requestAnimationFrame(animate);
+               //console.log(sprite); 
+               app.render(); 
+
+            }
+
+            animate();
+            var count = 0;
+app.ticker.add(function() {
+
+    count += 0.005;
+
+    var blurAmount = Math.cos(count);
+
+    blurFilter1.blur = 20 * (blurAmount);
+});
+
+        }
+    </script>
+
+
+</body>
+
+</html>
+
+
+

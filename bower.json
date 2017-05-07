@@ -1,0 +1,17 @@
+{
+  "name": "streetart_lyon_viewer",
+  "description": "",
+  "main": "index.html",
+  "authors": [
+    "P.Freydiere"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

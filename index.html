@@ -1,0 +1,115 @@
+
+<html>
+<body>
+  <div id="map" style="width:100%;height:100%"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+  <link rel="stylesheet" href="js/leaflet.css" />
+    <script src="js/leaflet.js"></script>
+    <script src="js/L.Map.SmoothZoom.js" ></script>
+   <script src="GLPixiLayer.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js" ></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
+   <script>
+     var leafletMap = L.map('map',{
+             smoothZoom: true,
+             smoothZoomDelay: 1000 //Default to 1000
+         }).setView([45.80, 4.8], 11);
+
+        // create the tile layer with correct attribution
+        //var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var osmUrl='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
+        var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osm = new L.TileLayer(osmUrl, {minZoom: 0, maxZoom: 19, attribution: osmAttrib})
+                            .addTo(leafletMap);
+
+        var glLayer = L.pixiLayer()
+                       .addTo(leafletMap);
+
+
+
+        function addElement(jsondata) {
+
+                    var e = glLayer.addElement(jsondata);
+
+                    var o = {};
+                    o.setScale = function(value) {
+                        e.scale.set(value);
+                    };
+                    o.getScale = function() {
+                        return e.scale.x;
+                    }
+                    // animate element
+                    e.on('pointerover', function() {
+                       
+                       TweenLite.to(o, 0.5, { setScale:0.3,
+                           ease:Power3.easeOut 
+                           });
+                        
+                        }).on('pointerout', function() {
+                        
+                            TweenLite.to(o, 0.5, { setScale:0.05,
+                                 ease:Power3.easeOut 
+                            });
+                        }).on("click", function() {
+                            console.log("clicked");   
+                            window.open(this.properties.originURL, "_blank");
+                        });
+                    
+                            TweenLite.from(e, 2, { x:-1000 - 500 * Math.random(),
+                                 ease:Elastic.easeOut ,
+                                 delay:2
+                            });
+ 
+        }
+
+/*
+        addElement({
+                  "type": "Feature",
+                  "properties": {
+                    "marker-color": "#7e7e7e",
+                    "marker-size": "medium",
+                    "marker-symbol": "marker-stroked",
+                    "imageURL": "https://scontent-cdg2-1.cdninstagram.com/t51.2885-15/e35/18094732_1291332437623744_8591123503372042240_n.jpg",
+                    "author": "cap_phi",
+                    "post_date": "2017-04-30",
+                    "publish_date": "2017-05-30",
+                    "iconURL": "https://scontent-cdg2-1.cdninstagram.com/t51.2885-15/e35/18094732_1291332437623744_8591123503372042240_n.jpg",
+                    "duration_days": 60,
+                    "location_precision_m": 5,
+                    "originURL": "https://www.instagram.com/p/BTIuRx3BukU",
+                    "calculated_end_date": "2017-06-30"
+                  },
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      4.8638105392456055,
+                      45.76135569917077
+                    ]
+                  }
+                });
+*/
+        $.ajax({
+            url:"street_art_post.geojson",
+            dataType:"json",
+            success:function(data) {
+                
+                if (data && data.features) {
+                    for (f of data.features) {
+                        console.log("adding");
+                        console.log(f);
+                        addElement(f);
+                    }
+
+                } else {
+                    console.log("error loading the datas");
+                }
+            }
+
+        });
+
+
+
+   </script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<html>
+
+
+<body>
+    <div id="map" style="width:100%;height:100%"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+
+    <script src="spriteUtilities.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+
+    <script src="GLOv.js"></script>
+
+  <script>
+    var u = new SpriteUtilities(PIXI);
+
+
+   var leafletMap = L.map('map').setView([50.00, 14.44], 5);
+    // create the tile layer with correct attribution
+    var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+    var osm = new L.TileLayer(osmUrl, {minZoom: 0, maxZoom: 19, attribution: osmAttrib}).addTo(leafletMap);
+  var app;
+
+
+  var glLayer = L.canvasOverlay()
+                       .drawing(drawingOnCanvas)
+                       .addTo(leafletMap);
+        var canvas = glLayer.canvas();
+        glLayer.canvas.width = canvas.clientWidth;
+        glLayer.canvas.height = canvas.clientHeight;
+        
+        console.log(canvas);
+
+     var app = new PIXI.Application(canvas.clientWidth,canvas.clientHeight
+        ,{
+            view:glLayer.canvas(),
+            transparent:true
+             });
+     // document.body.appendChild(app.view);
+
+        console.log(app);
+        console.log("client width :" + canvas.clientWidth);
+        console.log("client height :" + canvas.clientHeight);
+       
+        
+        console.log(app.renderer);       
+       
+        /* leafletMap.on("mousemove", function(e) { 
+            // console.log(arguments);
+            var event = e.originalEvent;
+            e2 = new event.constructor(event.type,event);
+
+
+            e2.cancelBubble = true;
+            canvas.dispatchEvent(e2);
+             });
+*/
+
+var container = new PIXI.Container();
+container.interactive = true;
+
+app.stage.addChild(container);
+for (var i = 0; i < 1; ++i)
+{
+    var sprite = u.sprite("myImage.jpg");
+    // center the sprite's anchor point
+    sprite.fps=10;
+sprite.anchor.set(0.5);
+sprite.lat = 45.750000;
+sprite.lon = 4.85;
+sprite.interactive = true;
+
+// move the sprite to the center of the screen
+sprite.x = 200;
+sprite.y = 200;
+ sprite.on('pointerover', onButtonOver)
+        .on('pointerout', onButtonOut)
+        .on('mousedown', function() {console.log("Sprite Mouse Down");});
+     container.addChild(sprite);
+    // app.stage.addChild(sprite);
+}
+    
+    function onButtonOver() {
+        console.log("over");
+        this.isOver = true;
+        u.shake(this,10, false);
+        //this.scale.set(4);
+    }
+    
+    function onButtonOut() {
+        this.isOver = false;
+        this.scale.set(1);
+    }
+
+     
+     app.start(); 
+	// Center on the screen
+container.x = (app.renderer.width - container.width) / 2;
+container.y = (app.renderer.height - container.height) / 2;        
+
+
+        function drawingOnCanvas(canvasOverlay, params) {
+	           // var ctx = params.canvas.getContext('2d');
+	           /* params.options.data.map(function (d, i) {
+	              // canvas drawing goes here
+	            });
+               */
+               // console.log("drawing on canvas");
+               // console.log(params);
+               var bounds = params.bounds;
+               var twidth = bounds.south
+               //console.log(ctx);
+               if (container) {
+                // move container
+                for (var i in container.children) {
+                    var s = container.children[i];
+                    var dot = canvasOverlay._map.latLngToContainerPoint([s.lat, s.lon]);
+                    // console.log(dot);
+                    s.x = dot.x - canvas.clientWidth / 2;
+                    s.y = dot.y - canvas.clientHeight / 2;
+
+                }
+              }
+	        };
+        // console.log(glLayer.canvas());
+
+    function animate() {
+
+            requestAnimationFrame(animate);
+            u.update();
+            // app.render();
+
+    }
+
+    animate();
+  	// parameters passed to custom draw function :
+//	 {
+//                                canvas   : <canvas>,
+//                                bounds   : <bounds in WGS84>
+//                                size     : <view size>,
+//                                zoomScale: <zoom scale is  1/resolution>,
+//                                zoom     : <current zoom>,
+//                                options  : <options passed >
+//             };
+
+
+
+  </script> 
+</body>
+</html>
