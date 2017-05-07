@@ -1,0 +1,22 @@
+{
+
+  "compilerOptions": {
+         "module": "commonjs",
+         "noImplicitAny": true,
+         "removeComments": true,
+         "preserveConstEnums": true,
+         "sourceMap": true
+     },
+      "compileOnSave": true,
+     "files": [
+       "GLPixLayer.ts"
+     ],
+     "include": [
+       "**/*.ts"
+   ],
+   "exclude": [
+       "node_modules",
+       "**/*.spec.ts"
+   ]
+
+}
