@@ -111,6 +111,7 @@ L.PixiLayer = L.Layer.extend({
         sprite.properties = f.properties;
         sprite.anchor.set(0.5);
         sprite.scale.set(0.05);
+        sprite.layer = this;
         this._elements.push(sprite);
         this._adjustSpritePosition(sprite);
         this._app.objectContainer.addChild(sprite);

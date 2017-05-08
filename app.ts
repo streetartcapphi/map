@@ -12,36 +12,159 @@ module App {
   declare var TweenLite : any;
   declare var Power3 : any;
   declare var Elastic : any;
+  declare var Bounce : any;
+
   declare var TimelineLite : any;
 
-
+    declare var TimelineMax : any;
 
   class HightLightState extends GLPixLayerElement.State {
 
-    constructor(context:GLPixLayerElement.AnimatedGLElement) {
+    public currentTween : gsap.TweenLite;
+    public previousNormalState : NormalState;
+
+    constructor(context:GLPixLayerElement.AnimatedGLElement, previousNormalState : NormalState) {
        super(context);
+       this.previousNormalState = previousNormalState;
     }
+
+    public onOver() : void {
+
+
+      var t : GLPixLayerElement.AnimatedGLElement = this._context;
+                         var o : any = {};
+                         o.setScale = function(value:number) {
+                             t.scale.set(value);
+                         };
+                         o.getScale = function() {
+                             return t.scale.x;
+                         };
+
+                            // for z order
+                            (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+
+                            this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
+                                ease:Power3.easeOut
+                                });
+
+    }
+
+    public onOut() : void {
+
+      console.log("on out" + this);
+      if (this.currentTween != null) {
+        this.currentTween.kill();
+        this.currentTween = null;
+      }
+      var tthis = this;
+      var t : GLPixLayerElement.AnimatedGLElement = this._context;
+
+      var o : any = {};
+      o.setScale = function(value:number) {
+          t.scale.set(value);
+      };
+      o.getScale = function() {
+          return t.scale.x;
+      };
+
+         // for z order
+         (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+
+         this.currentTween = TweenLite.to(o, 0.5, { setScale:0.05,
+             ease:Power3.easeOut,
+             onComplete:function() {
+               tthis._context.state = tthis.previousNormalState;
+               tthis.previousNormalState.restartYoyo();
+             }
+             });
+
+
+    }
+
+    public onReplaceElementOnContainer(newx:number, newy:number) : void {
+
+      this._context.x = newx;
+      this._context.y = newy;
+
+
+    };
+
 
 
   }
 
   class NormalState extends GLPixLayerElement.State {
-    constructor(context:GLPixLayerElement.AnimatedGLElement) {
+
+    public currentTween : gsap.TweenLite;
+    public timeline : gsap.TimelineMax;
+    public randomJump : number;
+    public originx : number;
+    public originy : number;
+    public speed : number;
+
+
+    constructor(context:GLPixLayerElement.AnimatedGLElement ) {
       super(context);
+      this.randomJump = Math.random() * 50;
+      this.speed =Math.random() + 0.2;
+      this.originx = context.x;
+      this.originy = context.y;
+
+        // this.timeline.play();
+        this.restartYoyo();
+
+    }
+
+    public restartYoyo() {
+      if (this.timeline) {
+        this.timeline.kill();
+      }
+      this.timeline = new TimelineMax({repeat:10, onComplete:function() {
+          this.restart();
+      }});
+
+      var t : GLPixLayerElement.AnimatedGLElement = this._context;
+        this.timeline.to(t, this.speed, { y: t.y - this.randomJump,
+        ease:Bounce.easeIn }, Math.random()).to(t, this.speed, { y: t.y,
+        ease:Bounce.easeOut });
+
     }
 
     public onOver() : void {
       console.log("on over " + this);
+
+      if (this.currentTween != null) {
+        this.currentTween.kill();
+        this.currentTween = null;
+      }
+
+      // stop timeline
+      this.timeline.kill();
+
+      this._context.x = this.originx;
+      this._context.y = this.originy;
+
+      // change State
+      this._context.state = new HightLightState(this._context, this);
+      this._context.state.onOver();
+
+
     };
     public onOut() : void {
-      console.log("on out" + this);
+
+
     };
     public onClick() : void {
       console.log("on click " + this);
     };
     public onReplaceElementOnContainer(newx:number, newy:number) : void {
+      this.originx = newx;
+      this.originy = newy;
+
       this._context.x = newx;
       this._context.y = newy;
+
+      this.restartYoyo();
     };
 
 
@@ -69,11 +192,8 @@ module App {
 
 
        function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) {
-           var e = glLayer.addAnimatedElement(jsondata);
-
+          var e = glLayer.addAnimatedElement(jsondata);
           e.state = new NormalState(e);
-
-
        }
 
 

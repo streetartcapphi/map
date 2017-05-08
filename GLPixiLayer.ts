@@ -176,6 +176,7 @@ declare var TweenLite : gsap.TweenLite;
       sprite.properties = f.properties;
       sprite.anchor.set(0.5);
       sprite.scale.set(0.05);
+      sprite.layer = this;
 
       this._elements.push(sprite); // remember
       this._adjustSpritePosition(sprite);

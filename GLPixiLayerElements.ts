@@ -2,7 +2,6 @@
 
 module GLPixLayerElement {
 
-
     class GLElement extends PIXI.Sprite {
       public lon : Number ;
       public lat : Number ;
@@ -12,17 +11,15 @@ module GLPixLayerElement {
     }
 
 
-
    export class AnimatedGLElement extends GLElement {
-
       public state : State;
-
-  }
+      public layer : any; // can't make a typed reference 
+   }
 
 
    export class State {
 
-       _context : AnimatedGLElement;
+      _context : AnimatedGLElement;
       constructor(context : AnimatedGLElement){
         this._context = context;
       };
