@@ -3,6 +3,7 @@
 ///<reference path="node_modules/@types/pixi.js/index.d.ts" />
 ///<reference path="node_modules/@types/gsap/index.d.ts" />
 ///<reference path="GLPixiLayer.d.ts"/>
+///<reference path="GLPixiLayerElements.ts"/>
 
 /*
  Based on Generic  Canvas Overlay for leaflet,
@@ -163,6 +164,49 @@ declare var TweenLite : gsap.TweenLite;
        return sprite;
     },
 
+    addAnimatedElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement {
+      // checks on elements
+      var lon = f.geometry && f.geometry.coordinates[0];
+      var lat = f.geometry && f.geometry.coordinates[1];
+      var image = (<any>f.properties)['imageURL'];
+      var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>PIXI.Sprite.fromImage(image);
+      sprite.lon = lon;
+      sprite.lat = lat;
+      sprite.interactive = true;
+      sprite.properties = f.properties;
+      sprite.anchor.set(0.5);
+      sprite.scale.set(0.05);
+
+      this._elements.push(sprite); // remember
+      this._adjustSpritePosition(sprite);
+      this._app.objectContainer.addChild(sprite);
+
+      sprite.state = null;
+
+      sprite.on("pointerover", ()=>{
+          if (sprite.state) {
+            sprite.state.onOver();
+          }
+      });
+
+      sprite.on("pointerout", ()=>{
+          if (sprite.state) {
+            sprite.state.onOut();
+          }
+      });
+
+      sprite.on("click", ()=> {
+        if (sprite.state) {
+          sprite.state.onClick();
+        }
+      });
+
+
+
+      return sprite;
+    },
+
+
     addTo: function (map:L.Map) {
         map.addLayer(this);
         return this;
@@ -226,15 +270,27 @@ declare var TweenLite : gsap.TweenLite;
           var canvas = this._canvas;
           var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
 
-          // if object has a timeline
-          var timeline : gsap.TimelineLite = pixiObject.timeline;
-          if (timeline) {
-              timeline.clear();
-             timeline.set(pixiObject, {x : dot.x - canvas.clientWidth/2});
-             timeline.set(pixiObject, {y : dot.y - canvas.clientHeight/2});
+
+          if (pixiObject.hasOwnProperty('state')) {
+
+              var a : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
+              if (a.state) {
+                a.state.onReplaceElementOnContainer(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
+              }
+
           } else {
-              (<any>TweenLite).set(pixiObject, {x : dot.x - canvas.clientWidth/2});
-              (<any>TweenLite).set(pixiObject, {y : dot.y - canvas.clientHeight/2});
+
+              // if object has a timeline
+              var timeline : gsap.TimelineLite = pixiObject.timeline;
+              if (timeline) {
+                  timeline.clear();
+                 timeline.set(pixiObject, {x : dot.x - canvas.clientWidth/2});
+                 timeline.set(pixiObject, {y : dot.y - canvas.clientHeight/2});
+              } else {
+                  (<any>TweenLite).set(pixiObject, {x : dot.x - canvas.clientWidth/2});
+                  (<any>TweenLite).set(pixiObject, {y : dot.y - canvas.clientHeight/2});
+              }
+
           }
     },
 
@@ -248,6 +304,9 @@ declare var TweenLite : gsap.TweenLite;
 
     }
 });
+
+
+
 
 (<any>L).pixiLayer = function (userDrawFunc? : GLPixLayer.UserDefinedDraw, options? : object) {
     return new (<any>L).PixiLayer(userDrawFunc, options);

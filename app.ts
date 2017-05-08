@@ -6,12 +6,48 @@
 
 ///<reference path="GLPixiLayer.d.ts"/>
 
+
 module App {
 
   declare var TweenLite : any;
   declare var Power3 : any;
   declare var Elastic : any;
   declare var TimelineLite : any;
+
+
+
+  class HightLightState extends GLPixLayerElement.State {
+
+    constructor(context:GLPixLayerElement.AnimatedGLElement) {
+       super(context);
+    }
+
+
+  }
+
+  class NormalState extends GLPixLayerElement.State {
+    constructor(context:GLPixLayerElement.AnimatedGLElement) {
+      super(context);
+    }
+
+    public onOver() : void {
+      console.log("on over " + this);
+    };
+    public onOut() : void {
+      console.log("on out" + this);
+    };
+    public onClick() : void {
+      console.log("on click " + this);
+    };
+    public onReplaceElementOnContainer(newx:number, newy:number) : void {
+      this._context.x = newx;
+      this._context.y = newy;
+    };
+
+
+  }
+
+
 
 
   export function main(mapDiv : string) {
@@ -30,6 +66,15 @@ module App {
 
        var glLayer = (<GLPixLayer.GLPixLayer>(<any> L).pixiLayer())
                       .addTo(leafletMap);
+
+
+       function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) {
+           var e = glLayer.addAnimatedElement(jsondata);
+
+          e.state = new NormalState(e);
+
+
+       }
 
 
 
@@ -74,6 +119,7 @@ module App {
                            window.open(this.properties.originURL, "_blank");
                        });
 
+                        // apparition
                            TweenLite.from(e, 2, { x:-1000 - 500 * Math.random(),
                                 ease:Elastic.easeOut ,
                                 delay:2
@@ -151,7 +197,7 @@ module App {
                                     for (var f of data.features) {
                                        //  console.log("adding");
                                        //  console.log(f);
-                                        addElement(f);
+                                        addAnimatedElement(f);
                                     }
                                 } else {
                                     console.log("error loading the datas");

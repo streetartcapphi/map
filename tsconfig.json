@@ -9,7 +9,8 @@
      },
       "compileOnSave": true,
      "files": [
-       "GLPixLayer.ts"
+       "GLPixLayer.ts",
+       "GLPixLayerElement.ts"
      ],
      "include": [
        "**/*.ts"
