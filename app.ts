@@ -43,21 +43,68 @@ module App {
                             // for z order
                             (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
 
+                            // glow and add associated text
                             this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
-                                ease:Power3.easeOut
+                                ease:Power3.easeOut,
+                                onComplete : function () {
+
+                                  var textContainer = new PIXI.Container();
+
+                                  var props  =<any> t.properties;
+                                  var content = "";
+                                  for (var p in props ) {
+                                    if (content != "") {
+                                      content = content + "\n";
+                                    }
+                                    content = content + p + ":" + props[p];
+                                  }
+
+                                  var textSample = new PIXI.Text(content, {
+                                      fontFamily: 'Arial',
+                                      fontSize: 100,
+                                      fill: 'black',
+                                      align: 'left'
+                                  });
+                                  textContainer.x = 800;
+                                  textSample.y = - textSample.height / 2
+
+                                  // background
+
+                                  var infos = new PIXI.Graphics();
+                                  infos.beginFill(0xFFFFFF);
+                                  infos.moveTo(0,0);
+                                  infos.lineStyle(2, 0xcccccc, 1);
+                                  infos.lineTo(textSample.width,0);
+                                  infos.lineTo(textSample.width,textSample.height);
+                                  infos.lineTo(0,textSample.height);
+                                  infos.lineTo(0,0);
+                                  infos.endFill();
+                                  infos.y = -textSample.height/2;
+
+                                  textContainer.addChild(infos);
+                                  textContainer.addChild(textSample);
+
+                                  textContainer.alpha = 0;
+                                  TweenLite.to(textContainer, 0.4, {alpha : 1});
+
+                                  t.addChild(textContainer);
+
+                                }
                                 });
 
     }
 
     public onOut() : void {
 
-      console.log("on out" + this);
+      // console.log("on out" + this);
       if (this.currentTween != null) {
         this.currentTween.kill();
         this.currentTween = null;
       }
       var tthis = this;
       var t : GLPixLayerElement.AnimatedGLElement = this._context;
+
+      t.removeChildren();
 
       var o : any = {};
       o.setScale = function(value:number) {
@@ -88,6 +135,11 @@ module App {
 
 
     };
+
+    public onClick() : void {
+        window.open( (<any> this._context.properties)['originURL'], "_blank");
+
+    }
 
 
 
@@ -131,7 +183,7 @@ module App {
     }
 
     public onOver() : void {
-      console.log("on over " + this);
+    //  console.log("on over " + this);
 
       if (this.currentTween != null) {
         this.currentTween.kill();
@@ -193,89 +245,11 @@ module App {
 
        function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) {
           var e = glLayer.addAnimatedElement(jsondata);
+          console.log("load " + e.width + " x " + e.height);
           e.state = new NormalState(e);
        }
 
 
-
-       function addElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) {
-
-                   var e = glLayer.addElement(jsondata);
-
-                   var o : any = {};
-                   o.setScale = function(value:number) {
-                       e.scale.set(value);
-                   };
-                   o.getScale = function() {
-                       return e.scale.x;
-                   }
-                   e.associatedScale = o;
-
-                   // animate element
-                   e.on('pointerover', function() {
-
-                      // for z order
-                      glLayer.placeOnTop(e);
-
-                      TweenLite.to(o, 0.5, { setScale:0.3,
-                          ease:Power3.easeOut
-                          });
-
-   /*
-                       var tweens = TweenLite.getTweensOf(o);
-                       console.log(tweens);
-                       for (i of tweens) {
-                           console.log("" + i + " active ? " + i.isActive());
-                       }
-   */
-
-                       }).on('pointerout', function() {
-
-                           TweenLite.to(o, 0.5, { setScale:0.05,
-                                ease:Power3.easeOut
-                           });
-                       }).on("click", function() {
-                           console.log("clicked");
-                           window.open(this.properties.originURL, "_blank");
-                       });
-
-                        // apparition
-                           TweenLite.from(e, 2, { x:-1000 - 500 * Math.random(),
-                                ease:Elastic.easeOut ,
-                                delay:2
-                           });
-
-
-
-                   e.on('touchstart', function() {
-
-                      glLayer.placeOnTop(e);
-                      var t : gsap.TimelineLite = e.timeline;
-                      if (!t) {
-                          t = new TimelineLite();
-                      }
-
-                      if (!t.isActive())
-                      {
-                      t.to(o, 1, { setScale:0.3,
-                          ease:Power3.easeOut
-                          });
-                      var curry = e.y;
-                      t.to(e, 1, { y:curry - 300,
-                          ease:Power3.easeOut
-                          }, "-=1");
-
-                       t.to(o, 0.5, { setScale:0.05,
-                                ease:Power3.easeOut
-                           });
-                      t.to(e, 0.5, { y:curry,
-                          ease:Power3.easeOut
-                          },"-=0.5");
-                      }
-                      e.timeline = t;
-                   });
-
-       }
 
    /*
        addElement({
@@ -304,10 +278,12 @@ module App {
                });
    */
 
+ // fromgist
 
+ /*
        $.ajax({
            url:"https://api.github.com/gists/36c8fdc1e8c8341f1ffd27e54e36d43d",
-           dataType:"json",
+           dataType:"json"
        }).then(
           data => {
                 $.ajax({url:data.files["street_art_post.geojson"].raw_url ,
@@ -326,6 +302,23 @@ module App {
 
          }
        );
+*/
+
+       $.ajax({
+          url:"https://streetartcapphi.github.io/locations/capphi.geojson",
+            dataType:"json"
+       }).then(
+         data => {
+                  if (data && data.features) {
+                      for (var f of data.features) {
+                         //  console.log("adding");
+                         //  console.log(f);
+                          addAnimatedElement(f);
+                      }
+                  } else {
+                      console.log("error loading the datas");
+                  }
+              }).fail( e => console.error(e));
 
   }
 

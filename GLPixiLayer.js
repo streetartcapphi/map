@@ -104,13 +104,24 @@ L.PixiLayer = L.Layer.extend({
         var lon = f.geometry && f.geometry.coordinates[0];
         var lat = f.geometry && f.geometry.coordinates[1];
         var image = f.properties['imageURL'];
-        var sprite = PIXI.Sprite.fromImage(image);
+        var texture = PIXI.Texture.fromImage(image);
+        var sprite = (new PIXI.Sprite(texture));
+        function updateSize() {
+            sprite.originalWidth = texture.baseTexture.width;
+            sprite.originalHeight = texture.baseTexture.height;
+            sprite.scale.set(0.05);
+        }
+        if (texture.baseTexture.hasLoaded) {
+            updateSize();
+        }
+        else {
+            texture.baseTexture.addListener("update", updateSize);
+        }
         sprite.lon = lon;
         sprite.lat = lat;
         sprite.interactive = true;
         sprite.properties = f.properties;
         sprite.anchor.set(0.5);
-        sprite.scale.set(0.05);
         sprite.layer = this;
         this._elements.push(sprite);
         this._adjustSpritePosition(sprite);

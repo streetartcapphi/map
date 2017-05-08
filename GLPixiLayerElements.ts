@@ -13,7 +13,9 @@ module GLPixLayerElement {
 
    export class AnimatedGLElement extends GLElement {
       public state : State;
-      public layer : any; // can't make a typed reference 
+      public layer : any; // can't make a typed reference
+      public originalWidth : number;
+      public originalHeight : number;
    }
 
 

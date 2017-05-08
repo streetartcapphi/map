@@ -169,13 +169,29 @@ declare var TweenLite : gsap.TweenLite;
       var lon = f.geometry && f.geometry.coordinates[0];
       var lat = f.geometry && f.geometry.coordinates[1];
       var image = (<any>f.properties)['imageURL'];
-      var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>PIXI.Sprite.fromImage(image);
+      var texture : PIXI.Texture = PIXI.Texture.fromImage(image);
+      var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement> (new PIXI.Sprite(texture));
+
+      function updateSize() {
+          sprite.originalWidth = texture.baseTexture.width;
+          sprite.originalHeight = texture.baseTexture.height;
+          // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
+          sprite.scale.set(0.05);
+      }
+
+      if (texture.baseTexture.hasLoaded) {
+          //console.log("hasloaded");
+          updateSize();
+      } else {
+          texture.baseTexture.addListener("update", updateSize);
+      }
+
       sprite.lon = lon;
       sprite.lat = lat;
       sprite.interactive = true;
       sprite.properties = f.properties;
       sprite.anchor.set(0.5);
-      sprite.scale.set(0.05);
+
       sprite.layer = this;
 
       this._elements.push(sprite); // remember
