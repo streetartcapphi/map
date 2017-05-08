@@ -329,6 +329,7 @@ module App {
           }
       }).addTo(leafletMap);
 
+      // load datas
        $.ajax({
           url:"https://streetartcapphi.github.io/locations/capphi.geojson",
             dataType:"json"
@@ -338,7 +339,13 @@ module App {
                       for (var f of data.features) {
                          //  console.log("adding");
                          //  console.log(f);
-                          addAnimatedElement(f);
+                         if (f.properties.hasOwnProperty("imageURL") && f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
+                            addAnimatedElement(f);
+                         } else {
+                           console.error("feature does not have the needed properties");
+                           console.error(f);
+                         }
+
                       }
                   } else {
                       console.log("error loading the datas");

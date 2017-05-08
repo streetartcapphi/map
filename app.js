@@ -179,7 +179,13 @@ var App;
             if (data && data.features) {
                 for (var _i = 0, _a = data.features; _i < _a.length; _i++) {
                     var f = _a[_i];
-                    addAnimatedElement(f);
+                    if (f.properties.hasOwnProperty("imageURL") && f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
+                        addAnimatedElement(f);
+                    }
+                    else {
+                        console.error("feature does not have the needed properties");
+                        console.error(f);
+                    }
                 }
             }
             else {
