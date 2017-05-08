@@ -167,6 +167,11 @@ var App;
             console.log("load " + e.width + " x " + e.height);
             e.state = new NormalState(e);
         }
+        L.control.locate({
+            strings: {
+                title: "Show me where I am, yo!"
+            }
+        }).addTo(leafletMap);
         $.ajax({
             url: "https://streetartcapphi.github.io/locations/capphi.geojson",
             dataType: "json"

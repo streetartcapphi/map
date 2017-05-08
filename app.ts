@@ -304,6 +304,31 @@ module App {
        );
 */
 
+//
+// leafletMap.locate({setView: true, watch: true}) /* This will return map so you can do chaining */
+//       .on('locationfound', function(e : any){
+//           var marker = L.marker([e.latitude, e.longitude]).bindPopup('Your are here :)');
+//           var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+//               weight: 1,
+//               color: 'blue',
+//               fillColor: '#cacaca',
+//               fillOpacity: 0.2
+//           });
+//           leafletMap.addLayer(marker);
+//           leafletMap.addLayer(circle);
+//       })
+//      .on('locationerror', function(e){
+//           console.log(e);
+//           alert("Location access denied.");
+//       });
+//
+
+      (<any>L.control).locate({
+          strings: {
+              title: "Show me where I am, yo!"
+          }
+      }).addTo(leafletMap);
+
        $.ajax({
           url:"https://streetartcapphi.github.io/locations/capphi.geojson",
             dataType:"json"
