@@ -230,7 +230,7 @@ module App {
        var leafletMap = L.map('map',<any>{
             smoothZoom: true,
             smoothZoomDelay: 1000 //Default to 1000
-        }).setView([45.80, 4.8], 12);
+        }).setView([45.7484600, 4.8467100], 13);
 
        // create the tile layer with correct attribution
        //var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
