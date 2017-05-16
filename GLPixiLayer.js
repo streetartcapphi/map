@@ -84,32 +84,42 @@ L.PixiLayer = L.Layer.extend({
         }
         this._canvas = null;
     },
-    addElement: function (f) {
-        var lon = f.geometry && f.geometry.coordinates[0];
-        var lat = f.geometry && f.geometry.coordinates[1];
-        var image = f.properties['imageURL'];
-        var sprite = PIXI.Sprite.fromImage(image);
-        sprite.lon = lon;
-        sprite.lat = lat;
-        sprite.interactive = true;
-        sprite.properties = f.properties;
-        sprite.anchor.set(0.5);
-        sprite.scale.set(0.05);
-        this._elements.push(sprite);
-        this._adjustSpritePosition(sprite);
-        this._app.objectContainer.addChild(sprite);
-        return sprite;
-    },
     addAnimatedElement: function (f) {
         var lon = f.geometry && f.geometry.coordinates[0];
         var lat = f.geometry && f.geometry.coordinates[1];
         var image = f.properties['imageURL'];
         var texture = PIXI.Texture.fromImage(image);
         var sprite = (new PIXI.Sprite(texture));
+        var c = new PIXI.Container();
+        c.interactive = true;
         function updateSize() {
             sprite.originalWidth = texture.baseTexture.width;
             sprite.originalHeight = texture.baseTexture.height;
-            sprite.scale.set(0.05);
+            var roundedRect = new PIXI.Graphics();
+            roundedRect.beginFill(0xcccccccc);
+            var rectWidth = texture.baseTexture.width;
+            var rectHeight = texture.baseTexture.height;
+            roundedRect.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
+            roundedRect.endFill();
+            roundedRect.interactive = true;
+            var contour = new PIXI.Graphics();
+            contour.beginFill(0x000000, 0);
+            contour.lineStyle(rectWidth / 20, 0xcccccc, 1);
+            contour.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
+            contour.endFill();
+            var arrow = new PIXI.Graphics();
+            arrow.beginFill(0xFF0000);
+            arrow.moveTo(0, 0);
+            arrow.lineTo(rectWidth / 10, 0);
+            arrow.lineTo(0, rectWidth / 10);
+            arrow.endFill();
+            c.addChild(sprite);
+            c.addChild(roundedRect);
+            c.addChild(contour);
+            c.addChild(arrow);
+            sprite.mask = roundedRect;
+            sprite.name = "sprite";
+            c.scale.set(0.05);
         }
         if (texture.baseTexture.hasLoaded) {
             updateSize();
@@ -117,32 +127,64 @@ L.PixiLayer = L.Layer.extend({
         else {
             texture.baseTexture.addListener("update", updateSize);
         }
-        sprite.lon = lon;
-        sprite.lat = lat;
-        sprite.interactive = true;
-        sprite.properties = f.properties;
-        sprite.anchor.set(0.5);
-        sprite.layer = this;
-        this._elements.push(sprite);
-        this._adjustSpritePosition(sprite);
-        this._app.objectContainer.addChild(sprite);
-        sprite.state = null;
-        sprite.on("pointerover", function () {
-            if (sprite.state) {
-                sprite.state.onOver();
+        c.lon = lon;
+        c.lat = lat;
+        c.interactive = true;
+        c.properties = f.properties;
+        c.layer = this;
+        c.addChild(sprite);
+        this._elements.push(c);
+        this._app.objectContainer.addChild(c);
+        c.on("pointerover", function () {
+            if (c.hasState()) {
+                c.getState().onOver();
             }
         });
-        sprite.on("pointerout", function () {
-            if (sprite.state) {
-                sprite.state.onOut();
+        c.on("pointerout", function () {
+            if (c.hasState()) {
+                c.getState().onOut();
             }
         });
-        sprite.on("click", function () {
-            if (sprite.state) {
-                sprite.state.onClick();
+        c.on("click", function () {
+            if (c.hasState()) {
+                c.getState().onClick();
             }
         });
-        return sprite;
+        c.on("touchstart", function () {
+            if (c.hasState()) {
+                c.getState().onTouchStart();
+            }
+        });
+        c.on("touchend", function () {
+            if (c.hasState()) {
+                c.getState().onTouchEnd();
+            }
+        });
+        c.on("touchendoutside", function () {
+            if (c.hasState()) {
+                c.getState().onTouchEndOutside();
+            }
+        });
+        c.setState = function (state) {
+            if (c._state) {
+                c._state.onChanged();
+                c._state = null;
+            }
+            c._state = state;
+        };
+        c.getState = function () {
+            return c._state;
+        };
+        c.hasState = function () {
+            return c._state != null && !(typeof c._state === 'undefined');
+        };
+        c.setPosition = function (x, y) {
+            c.x = x;
+            c.y = y;
+        };
+        c.setState(null);
+        this._adjustSpritePosition(c);
+        return c;
     },
     addTo: function (map) {
         map.addLayer(this);
@@ -190,23 +232,12 @@ L.PixiLayer = L.Layer.extend({
     _adjustSpritePosition: function (pixiObject) {
         var canvas = this._canvas;
         var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
-        if (pixiObject.hasOwnProperty('state')) {
-            var a = pixiObject;
-            if (a.state) {
-                a.state.onReplaceElementOnContainer(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
-            }
+        var a = pixiObject;
+        if (a.hasState()) {
+            a.getState().onReplaceElementOnContainer(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
         }
         else {
-            var timeline = pixiObject.timeline;
-            if (timeline) {
-                timeline.clear();
-                timeline.set(pixiObject, { x: dot.x - canvas.clientWidth / 2 });
-                timeline.set(pixiObject, { y: dot.y - canvas.clientHeight / 2 });
-            }
-            else {
-                TweenLite.set(pixiObject, { x: dot.x - canvas.clientWidth / 2 });
-                TweenLite.set(pixiObject, { y: dot.y - canvas.clientHeight / 2 });
-            }
+            a.setPosition(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
         }
     },
     _animateZoom: function (e) {

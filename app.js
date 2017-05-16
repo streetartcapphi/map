@@ -10,14 +10,14 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var App;
 (function (App) {
-    var HightLightState = (function (_super) {
-        __extends(HightLightState, _super);
-        function HightLightState(context, previousNormalState) {
+    var TouchHightLightState = (function (_super) {
+        __extends(TouchHightLightState, _super);
+        function TouchHightLightState(context, previousNormalState) {
             var _this = _super.call(this, context) || this;
             _this.previousNormalState = previousNormalState;
             return _this;
         }
-        HightLightState.prototype.onOver = function () {
+        TouchHightLightState.prototype.onOver = function () {
             var t = this._context;
             var o = {};
             o.setScale = function (value) {
@@ -30,49 +30,29 @@ var App;
             this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
-                    var textContainer = new PIXI.Container();
-                    var props = t.properties;
-                    var content = "";
-                    for (var p in props) {
-                        if (content != "") {
-                            content = content + "\n";
-                        }
-                        content = content + p + ":" + props[p];
-                    }
-                    var textSample = new PIXI.Text(content, {
-                        fontFamily: 'Arial',
-                        fontSize: 100,
-                        fill: 'black',
-                        align: 'left'
-                    });
-                    textContainer.x = 800;
-                    textSample.y = -textSample.height / 2;
-                    var infos = new PIXI.Graphics();
-                    infos.beginFill(0xFFFFFF);
-                    infos.moveTo(0, 0);
-                    infos.lineStyle(2, 0xcccccc, 1);
-                    infos.lineTo(textSample.width, 0);
-                    infos.lineTo(textSample.width, textSample.height);
-                    infos.lineTo(0, textSample.height);
-                    infos.lineTo(0, 0);
-                    infos.endFill();
-                    infos.y = -textSample.height / 2;
-                    textContainer.addChild(infos);
-                    textContainer.addChild(textSample);
-                    textContainer.alpha = 0;
-                    TweenLite.to(textContainer, 0.4, { alpha: 1 });
-                    t.addChild(textContainer);
                 }
             });
         };
-        HightLightState.prototype.onOut = function () {
+        TouchHightLightState.prototype.onChanged = function () {
+            if (this.currentTween != null) {
+                this.currentTween.kill();
+                this.currentTween = null;
+            }
+            var v = this._context.getChildByName("textContainer");
+            if (v) {
+                this._context.removeChild(v);
+            }
+        };
+        TouchHightLightState.prototype.onTouchStart = function () {
             if (this.currentTween != null) {
                 this.currentTween.kill();
                 this.currentTween = null;
             }
             var tthis = this;
             var t = this._context;
-            t.removeChildren();
+            var textContainer = t.getChildByName("textContainer");
+            if (textContainer)
+                t.removeChild(textContainer);
             var o = {};
             o.setScale = function (value) {
                 t.scale.set(value);
@@ -84,14 +64,85 @@ var App;
             this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.05,
                 ease: Power3.easeOut,
                 onComplete: function () {
-                    tthis._context.state = tthis.previousNormalState;
+                    tthis._context.setState(tthis.previousNormalState);
+                    tthis.previousNormalState.restartYoyo();
+                }
+            });
+        };
+        TouchHightLightState.prototype.onReplaceElementOnContainer = function (newx, newy) {
+            this._context.setPosition(newx, newy);
+        };
+        ;
+        TouchHightLightState.prototype.onClick = function () {
+        };
+        return TouchHightLightState;
+    }(GLPixLayerElement.State));
+    var HightLightState = (function (_super) {
+        __extends(HightLightState, _super);
+        function HightLightState(context, previousNormalState) {
+            var _this = _super.call(this, context) || this;
+            _this.previousNormalState = previousNormalState;
+            return _this;
+        }
+        HightLightState.prototype.onOver = function () {
+            if (this.currentTween) {
+                return;
+            }
+            var t = this._context;
+            var o = {};
+            o.setScale = function (value) {
+                t.scale.set(value);
+            };
+            o.getScale = function () {
+                return t.scale.x;
+            };
+            t.layer.placeOnTop(t);
+            var tthis = this;
+            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
+                ease: Power3.easeOut,
+                onComplete: function () {
+                    tthis.currentTween = null;
+                }
+            });
+        };
+        HightLightState.prototype.onChanged = function () {
+            if (this.currentTween != null) {
+                this.currentTween.kill();
+                this.currentTween = null;
+            }
+            var v = this._context.getChildByName("textContainer");
+            if (v) {
+                this._context.removeChild(v);
+            }
+        };
+        HightLightState.prototype.onOut = function () {
+            if (this.currentTween != null) {
+                this.currentTween.kill();
+                this.currentTween = null;
+            }
+            var tthis = this;
+            var t = this._context;
+            var textContainer = t.getChildByName("textContainer");
+            if (textContainer)
+                t.removeChild(textContainer);
+            var o = {};
+            o.setScale = function (value) {
+                t.scale.set(value);
+            };
+            o.getScale = function () {
+                return t.scale.x;
+            };
+            t.layer.placeOnTop(t);
+            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.05,
+                ease: Power3.easeOut,
+                onComplete: function () {
+                    tthis._context.setState(tthis.previousNormalState);
                     tthis.previousNormalState.restartYoyo();
                 }
             });
         };
         HightLightState.prototype.onReplaceElementOnContainer = function (newx, newy) {
-            this._context.x = newx;
-            this._context.y = newy;
+            this._context.setPosition(newx, newy);
         };
         ;
         HightLightState.prototype.onClick = function () {
@@ -122,23 +173,23 @@ var App;
                 ease: Bounce.easeIn }, Math.random()).to(t, this.speed, { y: t.y,
                 ease: Bounce.easeOut });
         };
-        NormalState.prototype.onOver = function () {
-            if (this.currentTween != null) {
-                this.currentTween.kill();
-                this.currentTween = null;
-            }
+        NormalState.prototype.onChanged = function () {
             this.timeline.kill();
-            this._context.x = this.originx;
-            this._context.y = this.originy;
-            this._context.state = new HightLightState(this._context, this);
-            this._context.state.onOver();
+            this._context.setPosition(this.originx, this.originy);
+        };
+        NormalState.prototype.onOver = function () {
+            this._context.setState(new HightLightState(this._context, this));
+            this._context.getState().onOver();
         };
         ;
+        NormalState.prototype.onTouchStart = function () {
+            this._context.setState(new TouchHightLightState(this._context, this));
+            this._context.getState().onOver();
+        };
         NormalState.prototype.onOut = function () {
         };
         ;
         NormalState.prototype.onClick = function () {
-            console.log("on click " + this);
         };
         ;
         NormalState.prototype.onReplaceElementOnContainer = function (newx, newy) {
@@ -164,8 +215,8 @@ var App;
             .addTo(leafletMap);
         function addAnimatedElement(jsondata) {
             var e = glLayer.addAnimatedElement(jsondata);
-            console.log("load " + e.width + " x " + e.height);
-            e.state = new NormalState(e);
+            e.setState(new NormalState(e));
+            return e;
         }
         L.control.locate({
             strings: {
@@ -179,8 +230,9 @@ var App;
             if (data && data.features) {
                 for (var _i = 0, _a = data.features; _i < _a.length; _i++) {
                     var f = _a[_i];
-                    if (f.properties.hasOwnProperty("imageURL") && f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
-                        addAnimatedElement(f);
+                    if (f.properties.hasOwnProperty("imageURL") &&
+                        f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
+                        var element = addAnimatedElement(f);
                     }
                     else {
                         console.error("feature does not have the needed properties");

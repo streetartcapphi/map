@@ -5,6 +5,7 @@
 ///<reference path="node_modules/@types/jquery/index.d.ts" />
 
 ///<reference path="GLPixiLayer.d.ts"/>
+///<reference path="GLPixiLayerElements.ts"/>
 
 
 module App {
@@ -13,11 +14,156 @@ module App {
   declare var Power3 : any;
   declare var Elastic : any;
   declare var Bounce : any;
-
   declare var TimelineLite : any;
+  declare var TimelineMax : any;
 
-    declare var TimelineMax : any;
 
+  class TouchHightLightState extends GLPixLayerElement.State {
+
+    public currentTween : gsap.TweenLite;
+    public previousNormalState : NormalState;
+
+    constructor(context:GLPixLayerElement.AnimatedGLElement, previousNormalState : NormalState) {
+       super(context);
+       this.previousNormalState = previousNormalState;
+    }
+
+    public onOver() : void {
+
+      var t : GLPixLayerElement.AnimatedGLElement = this._context;
+       var o : any = {};
+       o.setScale = function(value:number) {
+           t.scale.set(value);
+       };
+       o.getScale = function() {
+           return t.scale.x;
+       };
+
+        // for z order
+        (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+
+        // glow and add associated text
+        this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
+            ease:Power3.easeOut,
+            onComplete : function () {
+/*
+              var textContainer = new PIXI.Container();
+
+              var props  =<any> t.properties;
+              var content = "";
+              for (var p in props ) {
+                if (content != "") {
+                  content = content + "\n";
+                }
+                content = content + p + ":" + props[p];
+              }
+
+              var textSample = new PIXI.Text(content, {
+                  fontFamily: 'Arial',
+                  fontSize: 100,
+                  fill: 'black',
+                  align: 'left'
+              });
+              textContainer.x = 800;
+              textSample.y = - textSample.height / 2
+
+              // background
+
+              var infos = new PIXI.Graphics();
+              infos.beginFill(0xFFFFFF);
+              infos.moveTo(0,0);
+              infos.lineStyle(2, 0xcccccc, 1);
+              infos.lineTo(textSample.width,0);
+              infos.lineTo(textSample.width,textSample.height);
+              infos.lineTo(0,textSample.height);
+              infos.lineTo(0,0);
+              infos.endFill();
+              infos.y = -textSample.height/2;
+
+              textContainer.addChild(infos);
+              textContainer.addChild(textSample);
+
+              textContainer.alpha = 0;
+              TweenLite.to(textContainer, 0.4, {alpha : 1});
+
+              t.addChild(textContainer);
+              textContainer.name = "textContainer";
+*/
+            }
+          });
+    }
+
+    public onChanged() : void {
+            // console.log("on out" + this);
+            if (this.currentTween != null) {
+              this.currentTween.kill();
+              this.currentTween = null;
+            }
+
+            var v = this._context.getChildByName("textContainer");
+            if (v) {
+              this._context.removeChild(v);
+            }
+
+    }
+
+    public onTouchStart() : void {
+
+      // console.log("on out" + this);
+      if (this.currentTween != null) {
+        this.currentTween.kill();
+        this.currentTween = null;
+      }
+
+      var tthis = this;
+      var t : GLPixLayerElement.AnimatedGLElement = this._context;
+
+      var textContainer = t.getChildByName("textContainer");
+      if (textContainer) t.removeChild(textContainer);
+
+      var o : any = {};
+      o.setScale = function(value:number) {
+          t.scale.set(value);
+      };
+      o.getScale = function() {
+          return t.scale.x;
+      };
+
+     // for z order
+     (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+
+     // animate the scale
+     this.currentTween = TweenLite.to(o, 0.5, { setScale:0.05,
+         ease:Power3.easeOut,
+         onComplete:function() {
+           // change state
+           tthis._context.setState(tthis.previousNormalState);
+           // back to move
+           tthis.previousNormalState.restartYoyo();
+         }
+         });
+
+
+    }
+
+    public onReplaceElementOnContainer(newx:number, newy:number) : void {
+
+      this._context.setPosition(newx, newy);
+
+
+    };
+
+    public onClick() : void {
+
+    }
+
+
+  }
+
+
+  /**
+      highlight state handling
+  */
   class HightLightState extends GLPixLayerElement.State {
 
     public currentTween : gsap.TweenLite;
@@ -31,66 +177,89 @@ module App {
     public onOver() : void {
 
 
+      if (this.currentTween) {
+         // currently on animation,
+         return;
+      }
+
       var t : GLPixLayerElement.AnimatedGLElement = this._context;
-                         var o : any = {};
-                         o.setScale = function(value:number) {
-                             t.scale.set(value);
-                         };
-                         o.getScale = function() {
-                             return t.scale.x;
-                         };
+       var o : any = {};
+       o.setScale = function(value:number) {
+           t.scale.set(value);
+       };
+       o.getScale = function() {
+           return t.scale.x;
+       };
 
-                            // for z order
-                            (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+        // for z order
+        (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+        var tthis = this;
 
-                            // glow and add associated text
-                            this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
-                                ease:Power3.easeOut,
-                                onComplete : function () {
+        // glow and add associated text
+        this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
+            ease:Power3.easeOut,
+            onComplete : function () {
+/*
+              var textContainer = new PIXI.Container();
 
-                                  var textContainer = new PIXI.Container();
+              var props  =<any> t.properties;
+              var content = "";
+              for (var p in props ) {
+                if (content != "") {
+                  content = content + "\n";
+                }
+                content = content + p + ":" + props[p];
+              }
 
-                                  var props  =<any> t.properties;
-                                  var content = "";
-                                  for (var p in props ) {
-                                    if (content != "") {
-                                      content = content + "\n";
-                                    }
-                                    content = content + p + ":" + props[p];
-                                  }
+              var textSample = new PIXI.Text(content, {
+                  fontFamily: 'Arial',
+                  fontSize: 100,
+                  fill: 'black',
+                  align: 'left'
+              });
+              textContainer.x = 800;
+              textSample.y = - textSample.height / 2
 
-                                  var textSample = new PIXI.Text(content, {
-                                      fontFamily: 'Arial',
-                                      fontSize: 100,
-                                      fill: 'black',
-                                      align: 'left'
-                                  });
-                                  textContainer.x = 800;
-                                  textSample.y = - textSample.height / 2
+              // background
 
-                                  // background
+              var infos = new PIXI.Graphics();
+              infos.beginFill(0xFFFFFF);
+              infos.moveTo(0,0);
+              infos.lineStyle(2, 0xcccccc, 1);
+              infos.lineTo(textSample.width,0);
+              infos.lineTo(textSample.width,textSample.height);
+              infos.lineTo(0,textSample.height);
+              infos.lineTo(0,0);
+              infos.endFill();
+              infos.y = -textSample.height/2;
 
-                                  var infos = new PIXI.Graphics();
-                                  infos.beginFill(0xFFFFFF);
-                                  infos.moveTo(0,0);
-                                  infos.lineStyle(2, 0xcccccc, 1);
-                                  infos.lineTo(textSample.width,0);
-                                  infos.lineTo(textSample.width,textSample.height);
-                                  infos.lineTo(0,textSample.height);
-                                  infos.lineTo(0,0);
-                                  infos.endFill();
-                                  infos.y = -textSample.height/2;
+              textContainer.addChild(infos);
+              textContainer.addChild(textSample);
 
-                                  textContainer.addChild(infos);
-                                  textContainer.addChild(textSample);
+              textContainer.alpha = 0;
+              TweenLite.to(textContainer, 0.4, {alpha : 1});
 
-                                  textContainer.alpha = 0;
-                                  TweenLite.to(textContainer, 0.4, {alpha : 1});
+              t.addChild(textContainer);
+              textContainer.name = "textContainer";
+*/
+              tthis.currentTween = null;
 
-                                  t.addChild(textContainer);
+            }
+          });
 
-                                }
-                                });
+    }
+
+    public onChanged() : void {
+            // console.log("on out" + this);
+            if (this.currentTween != null) {
+              this.currentTween.kill();
+              this.currentTween = null;
+            }
+
+            var v = this._context.getChildByName("textContainer");
+            if (v) {
+              this._context.removeChild(v);
+            }
 
     }
 
@@ -101,10 +270,12 @@ module App {
         this.currentTween.kill();
         this.currentTween = null;
       }
+
       var tthis = this;
       var t : GLPixLayerElement.AnimatedGLElement = this._context;
 
-      t.removeChildren();
+      var textContainer = t.getChildByName("textContainer");
+      if (textContainer) t.removeChild(textContainer);
 
       var o : any = {};
       o.setScale = function(value:number) {
@@ -114,37 +285,35 @@ module App {
           return t.scale.x;
       };
 
-         // for z order
-         (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+     // for z order
+     (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
 
-         this.currentTween = TweenLite.to(o, 0.5, { setScale:0.05,
-             ease:Power3.easeOut,
-             onComplete:function() {
-               tthis._context.state = tthis.previousNormalState;
-               tthis.previousNormalState.restartYoyo();
-             }
-             });
-
+     // animate the scale
+     this.currentTween = TweenLite.to(o, 0.5, { setScale:0.05,
+         ease:Power3.easeOut,
+         onComplete:function() {
+           // change state
+           tthis._context.setState(tthis.previousNormalState);
+           // back to move
+           tthis.previousNormalState.restartYoyo();
+         }
+         });
 
     }
 
     public onReplaceElementOnContainer(newx:number, newy:number) : void {
-
-      this._context.x = newx;
-      this._context.y = newy;
-
-
+      this._context.setPosition(newx, newy);
     };
 
     public onClick() : void {
         window.open( (<any> this._context.properties)['originURL'], "_blank");
-
     }
-
-
 
   }
 
+  /**
+      Normal state handling
+  */
   class NormalState extends GLPixLayerElement.State {
 
     public currentTween : gsap.TweenLite;
@@ -163,11 +332,12 @@ module App {
       this.originy = context.y;
 
         // this.timeline.play();
-        this.restartYoyo();
+      this.restartYoyo();
 
     }
 
     public restartYoyo() {
+
       if (this.timeline) {
         this.timeline.kill();
       }
@@ -182,33 +352,43 @@ module App {
 
     }
 
-    public onOver() : void {
-    //  console.log("on over " + this);
+    public onChanged() : void {
 
+/*
       if (this.currentTween != null) {
         this.currentTween.kill();
         this.currentTween = null;
       }
-
+*/
       // stop timeline
       this.timeline.kill();
 
-      this._context.x = this.originx;
-      this._context.y = this.originy;
+      this._context.setPosition(this.originx, this.originy);
+    }
+
+
+    public onOver() : void {
 
       // change State
-      this._context.state = new HightLightState(this._context, this);
-      this._context.state.onOver();
-
+      this._context.setState(new HightLightState(this._context, this));
+      this._context.getState().onOver();
 
     };
+
+    // in case of touch start
+    public onTouchStart() : void {
+      this._context.setState(new TouchHightLightState(this._context, this));
+      this._context.getState().onOver();
+    }
+
     public onOut() : void {
 
+    };
 
-    };
     public onClick() : void {
-      console.log("on click " + this);
+      // console.log("on click " + this);
     };
+
     public onReplaceElementOnContainer(newx:number, newy:number) : void {
       this.originx = newx;
       this.originy = newy;
@@ -242,11 +422,15 @@ module App {
        var glLayer = (<GLPixLayer.GLPixLayer>(<any> L).pixiLayer())
                       .addTo(leafletMap);
 
-
-       function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) {
+       //
+       // add animated elements from json
+       //
+       function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement {
           var e = glLayer.addAnimatedElement(jsondata);
-          console.log("load " + e.width + " x " + e.height);
-          e.state = new NormalState(e);
+          // console.log("load " + e.width + " x " + e.height);
+          e.setState(new NormalState(e));
+
+          return e;
        }
 
 
@@ -339,8 +523,18 @@ module App {
                       for (var f of data.features) {
                          //  console.log("adding");
                          //  console.log(f);
-                         if (f.properties.hasOwnProperty("imageURL") && f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
-                            addAnimatedElement(f);
+                         if (f.properties.hasOwnProperty("imageURL") &&
+                              f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
+
+                              var element = addAnimatedElement(f);
+                              //
+                              // var e = element.getChildByName("sprite");
+                              // if (e) {
+                              //     var blurFilter  = new PIXI.filters.BlurFilter();
+                              //     blurFilter.blur = 0.5;
+                              //     e.filters = [blurFilter];
+                              // }
+
                          } else {
                            console.error("feature does not have the needed properties");
                            console.error(f);

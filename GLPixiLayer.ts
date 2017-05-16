@@ -144,39 +144,65 @@ declare var TweenLite : gsap.TweenLite;
 
     },
 
-    addElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayer.GLElement {
-
-       // checks on elements
-       var lon = f.geometry && f.geometry.coordinates[0];
-       var lat = f.geometry && f.geometry.coordinates[1];
-       var image = (<any>f.properties)['imageURL'];
-       var sprite : GLPixLayer.GLElement = <GLPixLayer.GLElement>PIXI.Sprite.fromImage(image);
-       sprite.lon = lon;
-       sprite.lat = lat;
-       sprite.interactive = true;
-       sprite.properties = f.properties;
-       sprite.anchor.set(0.5);
-       sprite.scale.set(0.05);
-
-       this._elements.push(sprite); // remember
-       this._adjustSpritePosition(sprite);
-       this._app.objectContainer.addChild(sprite);
-       return sprite;
-    },
-
     addAnimatedElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement {
       // checks on elements
+
       var lon = f.geometry && f.geometry.coordinates[0];
       var lat = f.geometry && f.geometry.coordinates[1];
       var image = (<any>f.properties)['imageURL'];
       var texture : PIXI.Texture = PIXI.Texture.fromImage(image);
       var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement> (new PIXI.Sprite(texture));
+      var c : GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
+      c.interactive = true;
 
+      //called when the texture is loaded
       function updateSize() {
+
           sprite.originalWidth = texture.baseTexture.width;
           sprite.originalHeight = texture.baseTexture.height;
           // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
-          sprite.scale.set(0.05);
+
+          // add mask
+
+          var roundedRect = new PIXI.Graphics();
+          roundedRect.beginFill(0xcccccccc);
+
+          var rectWidth = texture.baseTexture.width;
+          var rectHeight = texture.baseTexture.height;
+
+          roundedRect.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
+          roundedRect.endFill();
+
+          roundedRect.interactive = true;
+
+          var contour = new PIXI.Graphics();
+          contour.beginFill(0x000000,0);
+          contour.lineStyle(rectWidth/20, 0xcccccc, 1);
+          contour.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
+          contour.endFill();
+
+          var arrow = new PIXI.Graphics();
+          arrow.beginFill(0xFF0000);
+          // arrow.lineStyle(rectWidth/15, 0x0, 1);
+          arrow.moveTo(0,0);
+          arrow.lineTo(rectWidth/10,0);
+          arrow.lineTo(0,rectWidth/10);
+
+          arrow.endFill();
+
+
+          c.addChild(sprite);
+          c.addChild(roundedRect);
+          c.addChild(contour);
+          c.addChild(arrow);
+
+          sprite.mask = roundedRect;
+          sprite.name="sprite";
+
+          c.scale.set(0.05);
+          // c.anchor.set(0.5);
+
+
       }
 
       if (texture.baseTexture.hasLoaded) {
@@ -186,41 +212,95 @@ declare var TweenLite : gsap.TweenLite;
           texture.baseTexture.addListener("update", updateSize);
       }
 
-      sprite.lon = lon;
-      sprite.lat = lat;
-      sprite.interactive = true;
-      sprite.properties = f.properties;
-      sprite.anchor.set(0.5);
+      c.lon = lon;
+      c.lat = lat;
+      c.interactive = true;
+      c.properties = f.properties;
 
-      sprite.layer = this;
+      // c.anchor.set(0.5);
 
-      this._elements.push(sprite); // remember
-      this._adjustSpritePosition(sprite);
-      this._app.objectContainer.addChild(sprite);
+      c.layer = this;
 
-      sprite.state = null;
+      c.addChild(sprite);
 
-      sprite.on("pointerover", ()=>{
-          if (sprite.state) {
-            sprite.state.onOver();
+      this._elements.push(c); // remember
+
+      this._app.objectContainer.addChild(c);
+
+      // add state behaviour
+
+      c.on("pointerover", ()=>{
+          if (c.hasState()) {
+            c.getState().onOver();
           }
       });
 
-      sprite.on("pointerout", ()=>{
-          if (sprite.state) {
-            sprite.state.onOut();
+      c.on("pointerout", ()=>{
+          if (c.hasState()) {
+            c.getState().onOut();
           }
       });
 
-      sprite.on("click", ()=> {
-        if (sprite.state) {
-          sprite.state.onClick();
+      c.on("click", ()=> {
+        if (c.hasState()) {
+          c.getState().onClick();
         }
       });
 
+      // touch
+      // .on('touchstart', onButtonDown)
+            // .on('touchend', onButtonUp)
+            // .on('touchendoutside', onButtonUp)
+      c.on("touchstart", () => {
+        if (c.hasState()) {
+          c.getState().onTouchStart();
+        }
+
+      });
+
+      c.on("touchend", () => {
+        if (c.hasState()) {
+          c.getState().onTouchEnd();
+        }
 
 
-      return sprite;
+      });
+
+      c.on("touchendoutside", () => {
+        if (c.hasState()) {
+          c.getState().onTouchEndOutside();
+        }
+
+
+      });
+
+      // mixin
+
+      c.setState = (state : GLPixLayerElement.State) : void => {
+        if (c._state) {
+          c._state.onChanged();
+          c._state = null;
+        }
+        c._state = state;
+      }
+
+      c.getState = () : GLPixLayerElement.State => {
+        return c._state;
+      }
+      c.hasState = () : boolean => {
+        return c._state != null && !(typeof c._state === 'undefined');
+      }
+
+      c.setPosition = (x:number, y:number) : void => {
+        c.x = x;
+        c.y = y;
+      };
+
+      c.setState(null);
+
+      this._adjustSpritePosition(c);
+
+      return c;
     },
 
 
@@ -284,18 +364,23 @@ declare var TweenLite : gsap.TweenLite;
     },
 
     _adjustSpritePosition: function(pixiObject:GLPixLayer.GLElement) {
+
           var canvas = this._canvas;
           var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
 
-
-          if (pixiObject.hasOwnProperty('state')) {
+          // if (pixiObject.hasOwnProperty('_state')) { // animated mixin
 
               var a : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
-              if (a.state) {
-                a.state.onReplaceElementOnContainer(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
+              if (a.hasState()) {
+                // delegate position to state
+                a.getState().onReplaceElementOnContainer(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
+              } else {
+                a.setPosition(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
               }
 
-          } else {
+          // }
+
+          /*else {
 
               // if object has a timeline
               var timeline : gsap.TimelineLite = pixiObject.timeline;
@@ -308,7 +393,8 @@ declare var TweenLite : gsap.TweenLite;
                   (<any>TweenLite).set(pixiObject, {y : dot.y - canvas.clientHeight/2});
               }
 
-          }
+          }*/
+
     },
 
     _animateZoom: function (e : L.ZoomAnimEvent) {
@@ -321,8 +407,6 @@ declare var TweenLite : gsap.TweenLite;
 
     }
 });
-
-
 
 
 (<any>L).pixiLayer = function (userDrawFunc? : GLPixLayer.UserDefinedDraw, options? : object) {

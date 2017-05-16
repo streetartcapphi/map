@@ -12,7 +12,24 @@ module GLPixLayerElement {
 
 
    export class AnimatedGLElement extends GLElement {
-      public state : State;
+
+      public _state : State;
+
+      public setState(state : State) : void {
+      }
+
+      public getState() : State {
+        return null;
+      }
+
+      public hasState() : boolean {
+        return true;
+      }
+
+      public setPosition (x:number, y:number) : void {
+
+      }
+
       public layer : any; // can't make a typed reference
       public originalWidth : number;
       public originalHeight : number;
@@ -30,6 +47,13 @@ module GLPixLayerElement {
       public onOut() : void {};
       public onClick() : void {};
       public onReplaceElementOnContainer(newx:number, newy:number) : void {};
+      public onChanged(): void {};
+
+      // touch
+      public onTouchStart() : void {};
+      public onTouchEnd() : void {};
+      public onTouchEndOutside() : void {};
+
 
   }
 

@@ -22,6 +22,16 @@ var GLPixLayerElement;
         function AnimatedGLElement() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
+        AnimatedGLElement.prototype.setState = function (state) {
+        };
+        AnimatedGLElement.prototype.getState = function () {
+            return null;
+        };
+        AnimatedGLElement.prototype.hasState = function () {
+            return true;
+        };
+        AnimatedGLElement.prototype.setPosition = function (x, y) {
+        };
         return AnimatedGLElement;
     }(GLElement));
     GLPixLayerElement.AnimatedGLElement = AnimatedGLElement;
@@ -37,6 +47,14 @@ var GLPixLayerElement;
         State.prototype.onClick = function () { };
         ;
         State.prototype.onReplaceElementOnContainer = function (newx, newy) { };
+        ;
+        State.prototype.onChanged = function () { };
+        ;
+        State.prototype.onTouchStart = function () { };
+        ;
+        State.prototype.onTouchEnd = function () { };
+        ;
+        State.prototype.onTouchEndOutside = function () { };
         ;
         return State;
     }());
