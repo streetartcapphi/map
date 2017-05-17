@@ -10,6 +10,46 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var App;
 (function (App) {
+    var BaseHightLightState = (function (_super) {
+        __extends(BaseHightLightState, _super);
+        function BaseHightLightState(context) {
+            return _super.call(this, context) || this;
+        }
+        BaseHightLightState.prototype.addGlowing = function () {
+            var s = PIXI.Sprite.fromImage("glow-circle.png");
+            s.name = "glow";
+            s.anchor.set(0.5);
+            s.alpha = 0.3;
+            var gscale = 0.1;
+            s.scale.set(gscale);
+            this._context.addChildAt(s, 0);
+            var os = {};
+            os.setScale = function (value) {
+                s.scale.set(value);
+            };
+            os.getScale = function () {
+                return s.scale.x;
+            };
+            this.glowTimeLine = new TimelineMax({ repeat: 1000, onComplete: function () {
+                    this.restart();
+                } });
+            var gspeed = 0.1;
+            this.glowTimeLine.to(os, gspeed, { setScale: gscale,
+                ease: Sine.easeIn }, gspeed).to(os, gspeed, { setScale: gscale / 3,
+                ease: Sine.easeOut });
+        };
+        BaseHightLightState.prototype.removeGlowing = function () {
+            var g = this._context.getChildByName("glow");
+            if (g) {
+                this._context.removeChild(g);
+            }
+            if (this.glowTimeLine) {
+                this.glowTimeLine.kill();
+                this.glowTimeLine = null;
+            }
+        };
+        return BaseHightLightState;
+    }(GLPixLayerElement.State));
     var TouchHightLightState = (function (_super) {
         __extends(TouchHightLightState, _super);
         function TouchHightLightState(context, previousNormalState) {
@@ -18,6 +58,9 @@ var App;
             return _this;
         }
         TouchHightLightState.prototype.onOver = function () {
+            if (this.currentTween) {
+                return;
+            }
             var t = this._context;
             var o = {};
             o.setScale = function (value) {
@@ -27,11 +70,14 @@ var App;
                 return t.scale.x;
             };
             t.layer.placeOnTop(t);
+            var tthis = this;
             this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
+                    tthis.currentTween = null;
                 }
             });
+            this.addGlowing();
         };
         TouchHightLightState.prototype.onChanged = function () {
             if (this.currentTween != null) {
@@ -42,6 +88,7 @@ var App;
             if (v) {
                 this._context.removeChild(v);
             }
+            this.removeGlowing();
         };
         TouchHightLightState.prototype.onTouchStart = function () {
             if (this.currentTween != null) {
@@ -68,6 +115,7 @@ var App;
                     tthis.previousNormalState.restartYoyo();
                 }
             });
+            this.addGlowing();
         };
         TouchHightLightState.prototype.onReplaceElementOnContainer = function (newx, newy) {
             this._context.setPosition(newx, newy);
@@ -76,7 +124,7 @@ var App;
         TouchHightLightState.prototype.onClick = function () {
         };
         return TouchHightLightState;
-    }(GLPixLayerElement.State));
+    }(BaseHightLightState));
     var HightLightState = (function (_super) {
         __extends(HightLightState, _super);
         function HightLightState(context, previousNormalState) {
@@ -104,6 +152,7 @@ var App;
                     tthis.currentTween = null;
                 }
             });
+            this.addGlowing();
         };
         HightLightState.prototype.onChanged = function () {
             if (this.currentTween != null) {
@@ -114,6 +163,7 @@ var App;
             if (v) {
                 this._context.removeChild(v);
             }
+            this.removeGlowing();
         };
         HightLightState.prototype.onOut = function () {
             if (this.currentTween != null) {
@@ -155,7 +205,7 @@ var App;
             }
         };
         return HightLightState;
-    }(GLPixLayerElement.State));
+    }(BaseHightLightState));
     var NormalState = (function (_super) {
         __extends(NormalState, _super);
         function NormalState(context) {

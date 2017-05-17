@@ -14,11 +14,75 @@ module App {
   declare var Power3 : any;
   declare var Elastic : any;
   declare var Bounce : any;
+  declare var Sine : any;
   declare var TimelineLite : any;
   declare var TimelineMax : any;
 
 
-  class TouchHightLightState extends GLPixLayerElement.State {
+
+
+    class BaseHightLightState extends GLPixLayerElement.State {
+
+      public glowTimeLine : gsap.TimelineMax;
+
+
+      constructor(context:GLPixLayerElement.AnimatedGLElement) {
+         super(context);
+       }
+
+
+         public addGlowing() : void {
+
+
+                     var s = PIXI.Sprite.fromImage("glow-circle.png");
+                     s.name="glow";
+                     s.anchor.set(0.5);
+                     s.alpha=0.3;
+                     const gscale = 0.1;
+                     s.scale.set(gscale);
+                     this._context.addChildAt(s,0);
+
+
+                     var os : any = {};
+                     os.setScale = function(value:number) {
+                         s.scale.set(value);
+                     };
+                     os.getScale = function() {
+                         return s.scale.x;
+                     };
+
+
+                     this.glowTimeLine  = new TimelineMax({repeat:1000, onComplete:function() {
+                         this.restart();
+                     }});
+
+                     const gspeed = 0.1;
+                     this.glowTimeLine.to(os, gspeed, { setScale: gscale,
+                     ease:Sine.easeIn },gspeed).to(os, gspeed, { setScale : gscale/3,
+                     ease:Sine.easeOut });
+
+
+         }
+
+           public removeGlowing():void {
+
+                         var g = this._context.getChildByName("glow");
+                         if (g) {
+                           this._context.removeChild(g);
+                         }
+
+                         if (this.glowTimeLine) {
+                           this.glowTimeLine.kill();
+                           this.glowTimeLine = null;
+                         }
+
+           }
+
+
+    }
+
+
+  class TouchHightLightState extends BaseHightLightState {
 
     public currentTween : gsap.TweenLite;
     public previousNormalState : NormalState;
@@ -29,6 +93,12 @@ module App {
     }
 
     public onOver() : void {
+      
+      if (this.currentTween) {
+         // currently on animation,
+         // wait
+         return;
+      }
 
       var t : GLPixLayerElement.AnimatedGLElement = this._context;
        var o : any = {};
@@ -41,12 +111,13 @@ module App {
 
         // for z order
         (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
+        var tthis = this;
 
         // glow and add associated text
         this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
             ease:Power3.easeOut,
             onComplete : function () {
-/*
+  /*
               var textContainer = new PIXI.Container();
 
               var props  =<any> t.properties;
@@ -88,9 +159,16 @@ module App {
 
               t.addChild(textContainer);
               textContainer.name = "textContainer";
-*/
+  */
+              tthis.currentTween = null;
+
             }
           });
+
+          // add hoover circle picture
+          // with color rotation
+          this.addGlowing();
+
     }
 
     public onChanged() : void {
@@ -104,6 +182,8 @@ module App {
             if (v) {
               this._context.removeChild(v);
             }
+
+            this.removeGlowing();
 
     }
 
@@ -143,6 +223,7 @@ module App {
          }
          });
 
+         this.addGlowing();
 
     }
 
@@ -161,10 +242,11 @@ module App {
   }
 
 
+
   /**
       highlight state handling
   */
-  class HightLightState extends GLPixLayerElement.State {
+  class HightLightState extends BaseHightLightState {
 
     public currentTween : gsap.TweenLite;
     public previousNormalState : NormalState;
@@ -179,6 +261,7 @@ module App {
 
       if (this.currentTween) {
          // currently on animation,
+         // wait
          return;
       }
 
@@ -247,7 +330,12 @@ module App {
             }
           });
 
+          // add hoover circle picture
+          // with color rotation
+          this.addGlowing();
+
     }
+
 
     public onChanged() : void {
             // console.log("on out" + this);
@@ -260,6 +348,8 @@ module App {
             if (v) {
               this._context.removeChild(v);
             }
+
+            this.removeGlowing();
 
     }
 
