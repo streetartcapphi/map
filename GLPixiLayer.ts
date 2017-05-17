@@ -181,6 +181,9 @@ declare var TweenLite : gsap.TweenLite;
           contour.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
           contour.endFill();
 
+          var b = new PIXI.filters.BlurFilter(2);
+          contour.filters = [b];
+
           var arrow = new PIXI.Graphics();
           arrow.beginFill(0xFF0000);
           // arrow.lineStyle(rectWidth/15, 0x0, 1);

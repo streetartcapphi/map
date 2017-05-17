@@ -107,6 +107,8 @@ L.PixiLayer = L.Layer.extend({
             contour.lineStyle(rectWidth / 20, 0xcccccc, 1);
             contour.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
             contour.endFill();
+            var b = new PIXI.filters.BlurFilter(2);
+            contour.filters = [b];
             var arrow = new PIXI.Graphics();
             arrow.beginFill(0xFF0000);
             arrow.moveTo(0, 0);
