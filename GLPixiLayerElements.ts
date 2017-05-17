@@ -33,6 +33,7 @@ module GLPixLayerElement {
       public layer : any; // can't make a typed reference
       public originalWidth : number;
       public originalHeight : number;
+      public linkAttribute : string;
    }
 
 

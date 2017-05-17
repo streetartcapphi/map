@@ -146,7 +146,13 @@ var App;
         };
         ;
         HightLightState.prototype.onClick = function () {
-            window.open(this._context.properties['originURL'], "_blank");
+            var linkattribute = this._context.linkAttribute;
+            if (this._context.properties.hasOwnProperty(linkattribute)) {
+                window.open(this._context.properties[linkattribute], "_blank");
+            }
+            else {
+                console.error("object does not have attribute " + linkattribute);
+            }
         };
         return HightLightState;
     }(GLPixLayerElement.State));
@@ -228,6 +234,7 @@ var App;
         console.log("url params :");
         console.log(URLparams);
         var rel = URLparams.view || "capphi.geojson";
+        var linkattribute = URLparams.linkattribute || "originURL";
         $.ajax({
             url: "https://streetartcapphi.github.io/locations/" + rel,
             dataType: "json"
@@ -238,6 +245,7 @@ var App;
                     if (f.properties.hasOwnProperty("imageURL") &&
                         f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
                         var element = addAnimatedElement(f);
+                        element.linkAttribute = linkattribute;
                     }
                     else {
                         console.error("feature does not have the needed properties");

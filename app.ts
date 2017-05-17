@@ -306,7 +306,12 @@ module App {
     };
 
     public onClick() : void {
-        window.open( (<any> this._context.properties)['originURL'], "_blank");
+        var linkattribute = this._context.linkAttribute;
+        if (this._context.properties.hasOwnProperty(linkattribute)) {
+          window.open( (<any> this._context.properties)[linkattribute], "_blank");
+        } else {
+          console.error("object does not have attribute " + linkattribute);
+        }
     }
 
   }
@@ -521,6 +526,9 @@ module App {
       console.log(URLparams);
 
       var rel = URLparams.view || "capphi.geojson";
+
+      var linkattribute = URLparams.linkattribute || "originURL";
+
       // load datas
        $.ajax({
           url:"https://streetartcapphi.github.io/locations/" + rel,
@@ -542,6 +550,7 @@ module App {
                               //     blurFilter.blur = 0.5;
                               //     e.filters = [blurFilter];
                               // }
+                              element.linkAttribute = linkattribute;
 
                          } else {
                            console.error("feature does not have the needed properties");
