@@ -2,7 +2,7 @@
 Street_art_map
 ==============
 
-Ce projet propose une expérience cartographique de visualisation d'oeuvres urbaines éphémères, permettant une découverte sur le terrain.
+En cours de construction, ce projet vise à proposer une expérience cartographique de visualisation d'oeuvres urbaines éphémères, permettant une découverte sur le terrain.
 
 Centré sur les oeuvres de cap_phi [Instagram Cap_Phi](https://www.instagram.com/cap_phi/)
 
@@ -24,7 +24,6 @@ liste des actions évaluées pour la suite (sujet à changements en fonction des
 
 - Construction de la fenêtre de détail
 - Designer une expérience pour tablette / téléphone portable
-
 
 
 ## Version 2:
