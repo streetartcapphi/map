@@ -37,8 +37,8 @@ module App {
                      var s = PIXI.Sprite.fromImage("glow-circle.png");
                      s.name="glow";
                      s.anchor.set(0.5);
-                     s.alpha=0.3;
-                     const gscale = 0.1;
+                     s.alpha=0.7;
+                     const gscale = 0.5;
                      s.scale.set(gscale);
                      this._context.addChildAt(s,0);
 
@@ -93,7 +93,7 @@ module App {
     }
 
     public onOver() : void {
-      
+
       if (this.currentTween) {
          // currently on animation,
          // wait
