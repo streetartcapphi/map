@@ -190,7 +190,7 @@ declare var TweenLite : gsap.TweenLite;
           arrow.moveTo(0,0);
           arrow.lineTo(rectWidth/10,0);
           arrow.lineTo(0,rectWidth/10);
-
+          arrow.name="arrow";
           arrow.endFill();
 
 

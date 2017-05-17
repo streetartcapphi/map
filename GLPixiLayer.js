@@ -114,6 +114,7 @@ L.PixiLayer = L.Layer.extend({
             arrow.moveTo(0, 0);
             arrow.lineTo(rectWidth / 10, 0);
             arrow.lineTo(0, rectWidth / 10);
+            arrow.name = "arrow";
             arrow.endFill();
             c.addChild(sprite);
             c.addChild(roundedRect);
