@@ -513,9 +513,17 @@ module App {
           }
       }).addTo(leafletMap);
 
+      // extract parameters for file to display
+      var search = location.search.substring(1);
+      var URLparams = search?JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
+                 function(key, value) { return key===""?value:decodeURIComponent(value) }):{}
+      console.log("url params :" );
+      console.log(URLparams);
+
+      var rel = URLparams.view || "capphi.geojson";
       // load datas
        $.ajax({
-          url:"https://streetartcapphi.github.io/locations/capphi.geojson",
+          url:"https://streetartcapphi.github.io/locations/" + rel,
             dataType:"json"
        }).then(
          data => {
