@@ -19,7 +19,7 @@ module App {
   declare var TimelineMax : any;
 
 
-
+    var glowTexture = PIXI.Texture.fromImage("glow-circle.png");
 
     class BaseHightLightState extends GLPixLayerElement.State {
 
@@ -34,7 +34,7 @@ module App {
          public addGlowing() : void {
 
 
-                     var s = PIXI.Sprite.fromImage("glow-circle.png");
+                     var s = new PIXI.Sprite(glowTexture);
                      s.name="glow";
                      s.anchor.set(0.5);
                      s.alpha=0.7;
@@ -520,12 +520,63 @@ module App {
        //
        // add animated elements from json
        //
-       function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement {
-          var e = glLayer.addAnimatedElement(jsondata);
-          // console.log("load " + e.width + " x " + e.height);
-          e.setState(new NormalState(e));
+       function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise<GLPixLayerElement.AnimatedGLElement> {
 
-          return e;
+          var e  = glLayer.addAnimatedElement(jsondata);
+          // console.log("load " + e.width + " x " + e.height);
+          e.then( (c) => {
+            // add mask
+            var roundedRect = new PIXI.Graphics();
+            roundedRect.beginFill(0xcccccccc);
+
+            var rectWidth = c.originalWidth;
+            var rectHeight = c.originalHeight;
+
+            roundedRect.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
+            roundedRect.endFill();
+
+            roundedRect.interactive = true;
+
+            var contour = new PIXI.Graphics();
+            contour.beginFill(0x000000,0);
+            contour.lineStyle(rectWidth/20, 0xcccccc, 1);
+            contour.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
+            contour.endFill();
+
+            var b = new PIXI.filters.BlurFilter(2);
+            contour.filters = [b];
+
+            var arrow = new PIXI.Graphics();
+            arrow.beginFill(0xFF0000);
+            // arrow.lineStyle(rectWidth/15, 0x0, 1);
+            arrow.moveTo(0,0);
+            arrow.lineTo(rectWidth/10,0);
+            arrow.lineTo(0,rectWidth/10);
+            arrow.name="arrow";
+            arrow.endFill();
+
+
+
+            c.addChild(roundedRect);
+            c.addChild(contour);
+            c.addChild(arrow);
+
+            var sprite : PIXI.Sprite = <PIXI.Sprite> c.getChildByName("sprite");
+
+            sprite.mask = roundedRect;
+
+
+            c.scale.set(0.05);
+            // c.anchor.set(0.5);
+
+          } );
+
+
+          var p = e.promise();
+
+          p.then((e)=> {e.setState(new NormalState(e))} );
+
+          return p;
        }
 
 
@@ -640,7 +691,8 @@ module App {
                               //     blurFilter.blur = 0.5;
                               //     e.filters = [blurFilter];
                               // }
-                              element.linkAttribute = linkattribute;
+                              element.then((e)=> {e.linkAttribute = linkattribute;} );
+
 
                          } else {
                            console.error("feature does not have the needed properties");

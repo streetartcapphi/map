@@ -4,6 +4,8 @@
 ///<reference path="node_modules/@types/gsap/index.d.ts" />
 ///<reference path="GLPixiLayer.d.ts"/>
 ///<reference path="GLPixiLayerElements.ts"/>
+///<reference path="node_modules/@types/jquery/index.d.ts" />
+
 
 /*
  Based on Generic  Canvas Overlay for leaflet,
@@ -144,7 +146,7 @@ declare var TweenLite : gsap.TweenLite;
 
     },
 
-    addAnimatedElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement {
+    addAnimatedElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise< GLPixLayerElement.AnimatedGLElement> {
       // checks on elements
 
       var lon = f.geometry && f.geometry.coordinates[0];
@@ -155,55 +157,18 @@ declare var TweenLite : gsap.TweenLite;
       var c : GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
       c.interactive = true;
 
+      var promise = $.Deferred();
+      var tthis = this;
+
       //called when the texture is loaded
       function updateSize() {
 
-          sprite.originalWidth = texture.baseTexture.width;
-          sprite.originalHeight = texture.baseTexture.height;
-          // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
-
-          // add mask
-
-          var roundedRect = new PIXI.Graphics();
-          roundedRect.beginFill(0xcccccccc);
-
-          var rectWidth = texture.baseTexture.width;
-          var rectHeight = texture.baseTexture.height;
-
-          roundedRect.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
-          roundedRect.endFill();
-
-          roundedRect.interactive = true;
-
-          var contour = new PIXI.Graphics();
-          contour.beginFill(0x000000,0);
-          contour.lineStyle(rectWidth/20, 0xcccccc, 1);
-          contour.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
-          contour.endFill();
-
-          var b = new PIXI.filters.BlurFilter(2);
-          contour.filters = [b];
-
-          var arrow = new PIXI.Graphics();
-          arrow.beginFill(0xFF0000);
-          // arrow.lineStyle(rectWidth/15, 0x0, 1);
-          arrow.moveTo(0,0);
-          arrow.lineTo(rectWidth/10,0);
-          arrow.lineTo(0,rectWidth/10);
-          arrow.name="arrow";
-          arrow.endFill();
-
-
-          c.addChild(sprite);
-          c.addChild(roundedRect);
-          c.addChild(contour);
-          c.addChild(arrow);
-
-          sprite.mask = roundedRect;
-          sprite.name="sprite";
-
           c.scale.set(0.05);
-          // c.anchor.set(0.5);
+          c.originalWidth = texture.baseTexture.width;
+          c.originalHeight = texture.baseTexture.height;
+          // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
+            promise.resolve(c);
+          tthis._app.objectContainer.addChild(c);
 
 
       }
@@ -220,7 +185,10 @@ declare var TweenLite : gsap.TweenLite;
       c.interactive = true;
       c.properties = f.properties;
 
-      // c.anchor.set(0.5);
+
+      sprite.name="sprite";
+      c.addChild(sprite);
+
 
       c.layer = this;
 
@@ -228,7 +196,6 @@ declare var TweenLite : gsap.TweenLite;
 
       this._elements.push(c); // remember
 
-      this._app.objectContainer.addChild(c);
 
       // add state behaviour
 
@@ -303,7 +270,7 @@ declare var TweenLite : gsap.TweenLite;
 
       this._adjustSpritePosition(c);
 
-      return c;
+      return promise.promise();
     },
 
 

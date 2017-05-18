@@ -92,37 +92,14 @@ L.PixiLayer = L.Layer.extend({
         var sprite = (new PIXI.Sprite(texture));
         var c = new PIXI.Container();
         c.interactive = true;
+        var promise = $.Deferred();
+        var tthis = this;
         function updateSize() {
-            sprite.originalWidth = texture.baseTexture.width;
-            sprite.originalHeight = texture.baseTexture.height;
-            var roundedRect = new PIXI.Graphics();
-            roundedRect.beginFill(0xcccccccc);
-            var rectWidth = texture.baseTexture.width;
-            var rectHeight = texture.baseTexture.height;
-            roundedRect.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
-            roundedRect.endFill();
-            roundedRect.interactive = true;
-            var contour = new PIXI.Graphics();
-            contour.beginFill(0x000000, 0);
-            contour.lineStyle(rectWidth / 20, 0xcccccc, 1);
-            contour.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
-            contour.endFill();
-            var b = new PIXI.filters.BlurFilter(2);
-            contour.filters = [b];
-            var arrow = new PIXI.Graphics();
-            arrow.beginFill(0xFF0000);
-            arrow.moveTo(0, 0);
-            arrow.lineTo(rectWidth / 10, 0);
-            arrow.lineTo(0, rectWidth / 10);
-            arrow.name = "arrow";
-            arrow.endFill();
-            c.addChild(sprite);
-            c.addChild(roundedRect);
-            c.addChild(contour);
-            c.addChild(arrow);
-            sprite.mask = roundedRect;
-            sprite.name = "sprite";
             c.scale.set(0.05);
+            c.originalWidth = texture.baseTexture.width;
+            c.originalHeight = texture.baseTexture.height;
+            promise.resolve(c);
+            tthis._app.objectContainer.addChild(c);
         }
         if (texture.baseTexture.hasLoaded) {
             updateSize();
@@ -134,10 +111,11 @@ L.PixiLayer = L.Layer.extend({
         c.lat = lat;
         c.interactive = true;
         c.properties = f.properties;
+        sprite.name = "sprite";
+        c.addChild(sprite);
         c.layer = this;
         c.addChild(sprite);
         this._elements.push(c);
-        this._app.objectContainer.addChild(c);
         c.on("pointerover", function () {
             if (c.hasState()) {
                 c.getState().onOver();
@@ -187,7 +165,7 @@ L.PixiLayer = L.Layer.extend({
         };
         c.setState(null);
         this._adjustSpritePosition(c);
-        return c;
+        return promise.promise();
     },
     addTo: function (map) {
         map.addLayer(this);

@@ -25,7 +25,7 @@ declare namespace GLPixLayer {
 
   class GLPixLayer extends L.Layer {
      public addElement(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayer.GLElement;
-     public addAnimatedElement(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayerElement.AnimatedGLElement;
+     public addAnimatedElement(f : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise<GLPixLayerElement.AnimatedGLElement>;
      public placeOnTop(element : GLPixLayer.GLElement) :void;
   }
 
