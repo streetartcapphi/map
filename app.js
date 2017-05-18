@@ -282,7 +282,7 @@ var App;
                 roundedRect.interactive = true;
                 var contour = new PIXI.Graphics();
                 contour.beginFill(0x000000, 0);
-                contour.lineStyle(rectWidth / 20, 0xcccccc, 1);
+                contour.lineStyle(rectWidth / 100, 0xcccccc, 1);
                 contour.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
                 contour.endFill();
                 var arrow = new PIXI.Graphics();
