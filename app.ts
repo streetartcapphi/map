@@ -52,7 +52,7 @@ module App {
                      };
 
 
-                     this.glowTimeLine  = new TimelineMax({repeat:1000, onComplete:function() {
+                     this.glowTimeLine  = new TimelineMax({repeat:10, onComplete:function() {
                          this.restart();
                      }});
 
@@ -543,8 +543,11 @@ module App {
             contour.drawRoundedRect(0,0, rectWidth , rectHeight,rectWidth/5);
             contour.endFill();
 
-            var b = new PIXI.filters.BlurFilter(2);
-            contour.filters = [b];
+            // blur is VERY costy for tablets,
+            //
+            
+            // var b = new PIXI.filters.BlurFilter(2);
+            // contour.filters = [b];
 
             var arrow = new PIXI.Graphics();
             arrow.beginFill(0xFF0000);
@@ -684,13 +687,7 @@ module App {
                               f.hasOwnProperty('geometry') && f.geometry.type === "Point") {
 
                               var element = addAnimatedElement(f);
-                              //
-                              // var e = element.getChildByName("sprite");
-                              // if (e) {
-                              //     var blurFilter  = new PIXI.filters.BlurFilter();
-                              //     blurFilter.blur = 0.5;
-                              //     e.filters = [blurFilter];
-                              // }
+
                               element.then((e)=> {e.linkAttribute = linkattribute;} );
 
 

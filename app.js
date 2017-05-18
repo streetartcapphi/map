@@ -31,7 +31,7 @@ var App;
             os.getScale = function () {
                 return s.scale.x;
             };
-            this.glowTimeLine = new TimelineMax({ repeat: 1000, onComplete: function () {
+            this.glowTimeLine = new TimelineMax({ repeat: 10, onComplete: function () {
                     this.restart();
                 } });
             var gspeed = 0.1;
@@ -285,8 +285,6 @@ var App;
                 contour.lineStyle(rectWidth / 20, 0xcccccc, 1);
                 contour.drawRoundedRect(0, 0, rectWidth, rectHeight, rectWidth / 5);
                 contour.endFill();
-                var b = new PIXI.filters.BlurFilter(2);
-                contour.filters = [b];
                 var arrow = new PIXI.Graphics();
                 arrow.beginFill(0xFF0000);
                 arrow.moveTo(0, 0);
