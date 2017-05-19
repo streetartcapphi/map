@@ -62,7 +62,8 @@ def add(v,o):
 assert os.path.exists("locations/views")
 if not os.path.exists("locations/views/unvalidated"):
    os.mkdir("locations/views/unvalidated")
-   
+
+print("writing unvalidated") 
 f = open("locations/views/unvalidated/content.geojson", "w")
 f.write(json.dumps(reduce(add , unvalidated.values(), view), indent=4))
 f.close();
