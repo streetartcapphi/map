@@ -76,22 +76,34 @@ print json.dumps(by_week)
 
 assert os.path.exists("locations/views")
 basepath = "locations/views/bydate"
+cumulbasepath = "locations/views/cumulbydate"
+
+
 if not os.path.exists(basepath):
    os.mkdir(basepath)
 
+if not os.path.exists(cumulbasepath):
+   os.mkdir(cumulbasepath)
 
-def writeFiles(a,suffix):
+def writeFiles(a,suffix,basepath,cumul):
    assert a != None
+
+   view = {
+          "type":"FeatureCollection",
+          "features":[]
+   }
+ 
+
    for i in range(0,len(a)):
       foldername = str(i) + suffix
       folder = os.path.join(basepath, foldername)
       if not os.path.exists(folder):
          os.mkdir(folder)
-
-      view = {
-          "type":"FeatureCollection",
-          "features":[]
-      }
+      if not cumul:
+         view = {
+             "type":"FeatureCollection",
+             "features":[]
+          }
       view["features"] = view["features"] + a[i]
 
       f = open(os.path.join(folder,"content.geojson"), "w")
@@ -99,8 +111,12 @@ def writeFiles(a,suffix):
       f.close();
 
 print "writing weeks"
-writeFiles(by_week, "weeks")
-writeFiles(by_month, "months")
+writeFiles(by_week, "weeks", basepath, False)
+writeFiles(by_month, "months", basepath, False)
+
+print "cumul path write"
+writeFiles(by_week, "weeks", cumulbasepath, True)
+writeFiles(by_month, "months", cumulbasepath, True)
 
 print("Done")
 
