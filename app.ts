@@ -254,7 +254,7 @@ module App {
     constructor(context:GLPixLayerElement.AnimatedGLElement, previousNormalState : NormalState) {
        super(context);
        this.previousNormalState = previousNormalState;
-    } 
+    }
 
     public onOver() : void {
 
@@ -652,7 +652,7 @@ module App {
       console.log("url params :" );
       console.log(URLparams);
 
-      var rel = URLparams.view || "views/bydate/2months/content.geojson";
+      var rel = URLparams.view || "views/cumultbydate/2months/content.geojson";
 
       var linkattribute = URLparams.linkattribute || "originURL";
 
