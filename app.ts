@@ -637,24 +637,7 @@ module App {
        );
 */
 
-//
-// leafletMap.locate({setView: true, watch: true}) /* This will return map so you can do chaining */
-//       .on('locationfound', function(e : any){
-//           var marker = L.marker([e.latitude, e.longitude]).bindPopup('Your are here :)');
-//           var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
-//               weight: 1,
-//               color: 'blue',
-//               fillColor: '#cacaca',
-//               fillOpacity: 0.2
-//           });
-//           leafletMap.addLayer(marker);
-//           leafletMap.addLayer(circle);
-//       })
-//      .on('locationerror', function(e){
-//           console.log(e);
-//           alert("Location access denied.");
-//       });
-//
+
 
       (<any>L.control).locate({
           strings: {
@@ -669,7 +652,7 @@ module App {
       console.log("url params :" );
       console.log(URLparams);
 
-      var rel = URLparams.view || "capphi.geojson";
+      var rel = URLparams.view || "views/bydate/2months/content.geojson";
 
       var linkattribute = URLparams.linkattribute || "originURL";
 
@@ -692,7 +675,7 @@ module App {
 
 
                          } else {
-                           console.error("feature does not have the needed properties");
+                           console.error("feature does not have the needed properties imageURL, and geometry");
                            console.error(f);
                          }
 
