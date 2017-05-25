@@ -312,7 +312,7 @@ var App;
         var URLparams = search ? JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); }) : {};
         console.log("url params :");
         console.log(URLparams);
-        var rel = URLparams.view || "capphi.geojson";
+        var rel = URLparams.view || "views/bydate/2months/content.geojson";
         var linkattribute = URLparams.linkattribute || "originURL";
         $.ajax({
             url: "https://streetartcapphi.github.io/locations/" + rel,
@@ -327,7 +327,7 @@ var App;
                         element.then(function (e) { e.linkAttribute = linkattribute; });
                     }
                     else {
-                        console.error("feature does not have the needed properties");
+                        console.error("feature does not have the needed properties imageURL, and geometry");
                         console.error(f);
                     }
                 }

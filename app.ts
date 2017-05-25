@@ -254,7 +254,7 @@ module App {
     constructor(context:GLPixLayerElement.AnimatedGLElement, previousNormalState : NormalState) {
        super(context);
        this.previousNormalState = previousNormalState;
-    }
+    } 
 
     public onOver() : void {
 
