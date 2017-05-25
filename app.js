@@ -312,7 +312,7 @@ var App;
         var URLparams = search ? JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); }) : {};
         console.log("url params :");
         console.log(URLparams);
-        var rel = URLparams.view || "views/cumultbydate/2months/content.geojson";
+        var rel = URLparams.view || "views/cumulbydate/2months/content.geojson";
         var linkattribute = URLparams.linkattribute || "originURL";
         $.ajax({
             url: "https://streetartcapphi.github.io/locations/" + rel,
