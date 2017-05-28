@@ -285,7 +285,7 @@ var App;
             smoothZoomDelay: 1000
         }).setView([45.7484600, 4.8467100], 13);
         var osmUrl = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
-        var osmAttrib = 'Map data � <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osmAttrib = 'Map data @ <a href="http://openstreetmap.org">OpenStreetMap</a> contributors & stamen.com tiles';
         var osm = new L.TileLayer(osmUrl, { minZoom: 0, maxZoom: 19, attribution: osmAttrib })
             .addTo(leafletMap);
         var glLayer = L.pixiLayer()

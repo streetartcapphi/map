@@ -118,50 +118,7 @@ module App {
         this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
             ease:Power3.easeOut,
             onComplete : function () {
-  /*
-              var textContainer = new PIXI.Container();
-
-              var props  =<any> t.properties;
-              var content = "";
-              for (var p in props ) {
-                if (content != "") {
-                  content = content + "\n";
-                }
-                content = content + p + ":" + props[p];
-              }
-
-              var textSample = new PIXI.Text(content, {
-                  fontFamily: 'Arial',
-                  fontSize: 100,
-                  fill: 'black',
-                  align: 'left'
-              });
-              textContainer.x = 800;
-              textSample.y = - textSample.height / 2
-
-              // background
-
-              var infos = new PIXI.Graphics();
-              infos.beginFill(0xFFFFFF);
-              infos.moveTo(0,0);
-              infos.lineStyle(2, 0xcccccc, 1);
-              infos.lineTo(textSample.width,0);
-              infos.lineTo(textSample.width,textSample.height);
-              infos.lineTo(0,textSample.height);
-              infos.lineTo(0,0);
-              infos.endFill();
-              infos.y = -textSample.height/2;
-
-              textContainer.addChild(infos);
-              textContainer.addChild(textSample);
-
-              textContainer.alpha = 0;
-              TweenLite.to(textContainer, 0.4, {alpha : 1});
-
-              t.addChild(textContainer);
-              textContainer.name = "textContainer";
-  */
-
+              // at the end of the scaling,
                 var st = new Decorators.StarText();
                 t.addChild(st);
                 st.scale.set(4);
@@ -537,7 +494,7 @@ module App {
        // create the tile layer with correct attribution
        //var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
        var osmUrl='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
-       var osmAttrib='Map data � <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+       var osmAttrib='Map data @ <a href="http://openstreetmap.org">OpenStreetMap</a> contributors & stamen.com tiles';
        var osm = new L.TileLayer(osmUrl, {minZoom: 0, maxZoom: 19, attribution: osmAttrib})
                            .addTo(leafletMap);
 
