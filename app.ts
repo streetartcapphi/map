@@ -6,6 +6,7 @@
 
 ///<reference path="GLPixiLayer.d.ts"/>
 ///<reference path="GLPixiLayerElements.ts"/>
+///<reference path="startext.ts"/>
 
 
 module App {
@@ -160,6 +161,15 @@ module App {
               t.addChild(textContainer);
               textContainer.name = "textContainer";
   */
+
+                var st = new Decorators.StarText();
+                t.addChild(st);
+                st.scale.set(4);
+                st.init((<any>t.properties).author as string);
+                st.y = t.originalHeight;
+                st.x = t.originalWidth/2;
+                st.name="textarea";
+
               tthis.currentTween = null;
 
             }
@@ -182,6 +192,9 @@ module App {
             if (v) {
               this._context.removeChild(v);
             }
+
+            v = this._context.getChildByName("textarea");
+            if (v) this._context.removeChild(v);
 
             this.removeGlowing();
 
@@ -282,6 +295,17 @@ module App {
         this.currentTween = TweenLite.to(o, 0.5, { setScale:0.3,
             ease:Power3.easeOut,
             onComplete : function () {
+
+
+              var st = new Decorators.StarText();
+              t.addChild(st);
+              st.scale.set(4);
+              st.init((<any>t.properties).author as string);
+              st.y = t.originalHeight;
+              st.x = t.originalWidth/2;
+              st.name="textarea";
+
+
 /*
               var textContainer = new PIXI.Container();
 
@@ -348,6 +372,9 @@ module App {
             if (v) {
               this._context.removeChild(v);
             }
+
+            v = this._context.getChildByName("textarea");
+            if (v) this._context.removeChild(v);
 
             this.removeGlowing();
 

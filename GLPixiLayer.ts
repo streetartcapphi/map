@@ -62,7 +62,7 @@ declare var TweenLite : gsap.TweenLite;
         return this;
     },
 
-
+    // init the pixi application
     onAdd: function (map : L.Map) {
         this._map = map;
         this._canvas = L.DomUtil.create('canvas', 'leaflet-heatmap-layer');
