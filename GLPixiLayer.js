@@ -1,13 +1,11 @@
 L.PixiLayer = L.Layer.extend({
-    initialize: function (userDefinedDraw, options) {
-        this._userDrawFunc = userDefinedDraw;
+    initialize: function (options) {
         options = options || {
             zoomAnimation: false
         };
         L.setOptions(this, options);
     },
-    drawing: function (userDrawFunc) {
-        this._userDrawFunc = userDrawFunc;
+    drawing: function () {
         return this;
     },
     params: function (options) {
@@ -87,7 +85,13 @@ L.PixiLayer = L.Layer.extend({
     addAnimatedElement: function (f) {
         var lon = f.geometry && f.geometry.coordinates[0];
         var lat = f.geometry && f.geometry.coordinates[1];
+        if (!f.properties) {
+            throw new Error("geojson element must have non null properties");
+        }
         var image = f.properties['imageURL'];
+        if (!image) {
+            throw new Error("image must have an imageURL property");
+        }
         var texture = PIXI.Texture.fromImage(image);
         var sprite = (new PIXI.Sprite(texture));
         var c = new PIXI.Container();
@@ -190,16 +194,6 @@ L.PixiLayer = L.Layer.extend({
         var bounds = this._map.getBounds();
         var zoomScale = (size.x * 180) / (20037508.34 * (bounds.getEast() - bounds.getWest()));
         var zoom = this._map.getZoom();
-        if (this._userDrawFunc) {
-            this._userDrawFunc(this, {
-                canvas: this._canvas,
-                bounds: bounds,
-                size: size,
-                zoomScale: zoomScale,
-                zoom: zoom,
-                options: this.options
-            });
-        }
         if (this._app && this._map && this._app.objectContainer) {
             var container = this._app.objectContainer;
             for (var i in container.children) {
@@ -222,10 +216,9 @@ L.PixiLayer = L.Layer.extend({
         }
     },
     _animateZoom: function (e) {
-        var scale = this._map.getZoomScale(e.zoom), offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
     }
 });
-L.pixiLayer = function (userDrawFunc, options) {
-    return new L.PixiLayer(userDrawFunc, options);
+L.pixiLayer = function (options) {
+    return new L.PixiLayer(options);
 };
 //# sourceMappingURL=GLPixiLayer.js.map

@@ -2,7 +2,6 @@
 ///<reference path="node_modules/@types/leaflet/index.d.ts" />
 ///<reference path="node_modules/@types/pixi.js/index.d.ts" />
 ///<reference path="node_modules/@types/gsap/index.d.ts" />
-
 ///<reference path="GLPixiLayerElements.ts" />
 
 
@@ -12,19 +11,8 @@ declare namespace GLPixLayer {
     objectContainer : PIXI.Container;
   }
 
-  type  UserDefinedDraw =  (
-    layer : GLPixLayer,options: {
-                            canvas   :HTMLCanvasElement,
-                            bounds   : L.Bounds,
-                            size     : L.Point,
-                            zoomScale: Number,
-                            zoom : Number,
-                            options: any
-                       }
-  ) => void;
-
   class GLPixLayer extends L.Layer {
-     public addElement(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayer.GLElement;
+     // public addElement(f : GeoJSON.Feature<GeoJSON.Point>) : GLPixLayer.GLElement;
      public addAnimatedElement(f : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise<GLPixLayerElement.AnimatedGLElement>;
      public placeOnTop(element : GLPixLayer.GLElement) :void;
   }

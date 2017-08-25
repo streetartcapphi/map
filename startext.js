@@ -48,6 +48,14 @@ var Decorators;
                 y: -textSample.height / 2, ease: Bounce.easeOut }));
             timeline.add(TweenLite.to(textContainer, this.ti, { alpha: 1, ease: Power3.easeOut }), "=-" + this.ti);
             timeline.play();
+            this.timeline = timeline;
+        };
+        StarText.prototype.destroy = function () {
+            var t = this.timeline;
+            if (t != null) {
+                t.kill();
+                this.timeline = null;
+            }
         };
         return StarText;
     }(PIXI.Container));

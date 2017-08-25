@@ -21,6 +21,8 @@ module Decorators {
 
     textwidth : number;
 
+    timeline :  gsap.TimelineMax;
+
     public init(content : string) {
 
 
@@ -74,7 +76,16 @@ module Decorators {
             timeline.add(TweenLite.to(textContainer, this.ti, {alpha : 1, ease: Power3.easeOut}), "=-" + this.ti);
 
             timeline    .play();
+            this.timeline = timeline;
 
+    }
+
+    public destroy() {
+        var t = this.timeline;
+        if (t != null) {
+          t.kill();
+          this.timeline = null;
+        }
     }
 
 

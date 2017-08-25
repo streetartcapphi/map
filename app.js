@@ -163,7 +163,7 @@ var App;
                     var st = new Decorators.StarText();
                     t.addChild(st);
                     st.scale.set(4);
-                    st.init(t.properties.author);
+                    st.init("by " + t.properties.author);
                     st.y = t.originalHeight;
                     st.x = t.originalWidth / 2;
                     st.name = "textarea";
@@ -182,8 +182,10 @@ var App;
                 this._context.removeChild(v);
             }
             v = this._context.getChildByName("textarea");
-            if (v)
+            if (v) {
                 this._context.removeChild(v);
+                v.destroy();
+            }
             this.removeGlowing();
         };
         HightLightState.prototype.onOut = function () {
@@ -204,7 +206,8 @@ var App;
                 return t.scale.x;
             };
             t.layer.placeOnTop(t);
-            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.05,
+            this.currentTween = TweenLite.to(o, 0.5, {
+                setScale: 0.05,
                 ease: Power3.easeOut,
                 onComplete: function () {
                     tthis._context.setState(tthis.previousNormalState);

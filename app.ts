@@ -22,7 +22,11 @@ module App {
 
     var glowTexture = PIXI.Texture.fromImage("glow-circle.png");
 
+    /**
+     * base class for hight light state, add a glow at the geographic position
+     */
     class BaseHightLightState extends GLPixLayerElement.State {
+
 
       public glowTimeLine : gsap.TimelineMax;
 
@@ -101,6 +105,7 @@ module App {
          return;
       }
 
+      // closure
       var t : GLPixLayerElement.AnimatedGLElement = this._context;
        var o : any = {};
        o.setScale = function(value:number) {
@@ -231,7 +236,8 @@ module App {
 
       if (this.currentTween) {
          // currently on animation,
-         // wait
+         // wait the end before restart the
+         // highlight
          return;
       }
 
@@ -253,59 +259,18 @@ module App {
             ease:Power3.easeOut,
             onComplete : function () {
 
+              // at the end of the scaling,
+              // show the text
 
               var st = new Decorators.StarText();
               t.addChild(st);
+
               st.scale.set(4);
-              st.init((<any>t.properties).author as string);
+              st.init("by " + (<any>t.properties).author as string);
               st.y = t.originalHeight;
               st.x = t.originalWidth/2;
               st.name="textarea";
 
-
-/*
-              var textContainer = new PIXI.Container();
-
-              var props  =<any> t.properties;
-              var content = "";
-              for (var p in props ) {
-                if (content != "") {
-                  content = content + "\n";
-                }
-                content = content + p + ":" + props[p];
-              }
-
-              var textSample = new PIXI.Text(content, {
-                  fontFamily: 'Arial',
-                  fontSize: 100,
-                  fill: 'black',
-                  align: 'left'
-              });
-              textContainer.x = 800;
-              textSample.y = - textSample.height / 2
-
-              // background
-
-              var infos = new PIXI.Graphics();
-              infos.beginFill(0xFFFFFF);
-              infos.moveTo(0,0);
-              infos.lineStyle(2, 0xcccccc, 1);
-              infos.lineTo(textSample.width,0);
-              infos.lineTo(textSample.width,textSample.height);
-              infos.lineTo(0,textSample.height);
-              infos.lineTo(0,0);
-              infos.endFill();
-              infos.y = -textSample.height/2;
-
-              textContainer.addChild(infos);
-              textContainer.addChild(textSample);
-
-              textContainer.alpha = 0;
-              TweenLite.to(textContainer, 0.4, {alpha : 1});
-
-              t.addChild(textContainer);
-              textContainer.name = "textContainer";
-*/
               tthis.currentTween = null;
 
             }
@@ -319,21 +284,24 @@ module App {
 
 
     public onChanged() : void {
-            // console.log("on out" + this);
-            if (this.currentTween != null) {
-              this.currentTween.kill();
-              this.currentTween = null;
-            }
+        // console.log("on out" + this);
+        if (this.currentTween != null) {
+          this.currentTween.kill();
+          this.currentTween = null;
+        }
 
-            var v = this._context.getChildByName("textContainer");
-            if (v) {
-              this._context.removeChild(v);
-            }
+        var v = this._context.getChildByName("textContainer");
+        if (v) {
+          this._context.removeChild(v);
+        }
 
-            v = this._context.getChildByName("textarea");
-            if (v) this._context.removeChild(v);
+        v = this._context.getChildByName("textarea");
+        if (v) {
+            this._context.removeChild(v);
+            v.destroy();
+        }
 
-            this.removeGlowing();
+        this.removeGlowing();
 
     }
 
@@ -363,7 +331,8 @@ module App {
      (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
 
      // animate the scale
-     this.currentTween = TweenLite.to(o, 0.5, { setScale:0.05,
+     this.currentTween = TweenLite.to(o, 0.5, {
+         setScale:0.05,
          ease:Power3.easeOut,
          onComplete:function() {
            // change state
@@ -503,6 +472,7 @@ module App {
 
        //
        // add animated elements from json
+       // factory method for adding elements
        //
        function addAnimatedElement(jsondata : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise<GLPixLayerElement.AnimatedGLElement> {
 

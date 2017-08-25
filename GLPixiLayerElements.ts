@@ -3,6 +3,7 @@
 module GLPixLayerElement {
 
     class GLElement extends PIXI.Sprite {
+      // lat / lon position of the element
       public lon : Number ;
       public lat : Number ;
       public properties : object;
@@ -10,7 +11,7 @@ module GLPixLayerElement {
       public associatedScale : object;
     }
 
-
+   // GLElement with an associated state (for animation)
    export class AnimatedGLElement extends GLElement {
 
       public _state : State;
@@ -31,15 +32,18 @@ module GLPixLayerElement {
       }
 
       public layer : any; // can't make a typed reference
+      // original width and hight of the image (permit to handle the scale)
       public originalWidth : number;
       public originalHeight : number;
       public linkAttribute : string;
    }
 
-
+   // abstract base class for state handling
    export class State {
 
+      // the associated animated element
       _context : AnimatedGLElement;
+      
       constructor(context : AnimatedGLElement){
         this._context = context;
       };
