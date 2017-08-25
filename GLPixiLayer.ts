@@ -10,6 +10,7 @@
 /*
  Based on Generic  Canvas Overlay for leaflet,
  Stanislav Sumbera, April , 2014
+ Patrice Freydiere, May, 2017 , pixi interaction
 
  integration of PIXI objects , Patrice Freydiere 2017-05
 
@@ -18,15 +19,15 @@ declare var TweenLite : gsap.TweenLite;
 
 (<any>L).PixiLayer = L.Layer.extend({
 
-    initialize: function (userDefinedDraw?: GLPixLayer.UserDefinedDraw, options? : object) {
-        this._userDrawFunc = userDefinedDraw;
+    initialize: function ( options? : object) { // userDefinedDraw?: GLPixLayer.UserDefinedDraw,
+        // this._userDrawFunc = userDefinedDraw;
         options = options || {
            zoomAnimation:false };
         (<any>L).setOptions(this, options);
     },
 
-    drawing: function (userDrawFunc: GLPixLayer.UserDefinedDraw) {
-        this._userDrawFunc = userDrawFunc;
+    drawing: function () { //  userDrawFunc: GLPixLayer.UserDefinedDraw
+        // this._userDrawFunc = userDrawFunc;
         return this;
     },
 
@@ -62,7 +63,7 @@ declare var TweenLite : gsap.TweenLite;
         return this;
     },
 
-
+    // init the pixi application
     onAdd: function (map : L.Map) {
         this._map = map;
         this._canvas = L.DomUtil.create('canvas', 'leaflet-heatmap-layer');
@@ -151,9 +152,20 @@ declare var TweenLite : gsap.TweenLite;
 
       var lon = f.geometry && f.geometry.coordinates[0];
       var lat = f.geometry && f.geometry.coordinates[1];
+
+      if (!f.properties) {
+        throw new Error("geojson element must have non null properties");
+      }
+
       var image = (<any>f.properties)['imageURL'];
+
+      if (!image) {
+         throw new Error("image must have an imageURL property");
+      }
+
       var texture : PIXI.Texture = PIXI.Texture.fromImage(image);
       var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement> (new PIXI.Sprite(texture));
+
       var c : GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
       c.interactive = true;
 
@@ -169,7 +181,6 @@ declare var TweenLite : gsap.TweenLite;
           // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
             promise.resolve(c);
           tthis._app.objectContainer.addChild(c);
-
 
       }
 
@@ -194,7 +205,7 @@ declare var TweenLite : gsap.TweenLite;
 
       c.addChild(sprite);
 
-      this._elements.push(c); // remember
+      this._elements.push(c); // remember all elements
 
 
       // add state behaviour
@@ -303,21 +314,6 @@ declare var TweenLite : gsap.TweenLite;
         var zoomScale : number  = (size.x * 180) / (20037508.34  * (bounds.getEast() - bounds.getWest())); // resolution = 1/zoomScale
         var zoom : number = this._map.getZoom();
 
-        //console.time('process');
-
-        if (this._userDrawFunc) {
-            this._userDrawFunc(this,
-                                {
-                                    canvas   :this._canvas,
-                                    bounds   : bounds,
-                                    size     : size,
-                                    zoomScale: zoomScale,
-                                    zoom : zoom,
-                                    options: this.options
-                               });
-        }
-
-
         if (this._app && this._map && this._app.objectContainer) {
             var container = (<GLPixLayer.GLAPP>this._app).objectContainer;
             // move the children
@@ -328,8 +324,6 @@ declare var TweenLite : gsap.TweenLite;
             this._app.render();
         }
 
-
-        // console.timeEnd('process');
         this._frame = null;
     },
 
@@ -338,7 +332,6 @@ declare var TweenLite : gsap.TweenLite;
           var canvas = this._canvas;
           var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
 
-          // if (pixiObject.hasOwnProperty('_state')) { // animated mixin
 
               var a : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
               if (a.hasState()) {
@@ -348,37 +341,31 @@ declare var TweenLite : gsap.TweenLite;
                 a.setPosition(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
               }
 
-          // }
-
-          /*else {
-
-              // if object has a timeline
-              var timeline : gsap.TimelineLite = pixiObject.timeline;
-              if (timeline) {
-                  timeline.clear();
-                 timeline.set(pixiObject, {x : dot.x - canvas.clientWidth/2});
-                 timeline.set(pixiObject, {y : dot.y - canvas.clientHeight/2});
-              } else {
-                  (<any>TweenLite).set(pixiObject, {x : dot.x - canvas.clientWidth/2});
-                  (<any>TweenLite).set(pixiObject, {y : dot.y - canvas.clientHeight/2});
-              }
-
-          }*/
 
     },
 
+
+
+
     _animateZoom: function (e : L.ZoomAnimEvent) {
-        var scale = this._map.getZoomScale(e.zoom),
-            offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
 
-        //L.DomUtil.setTransform(this._canvas, offset,scale);
 
-        //this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
+/*
+        var scale = this._map.getZoomScale(e.zoom);
+        var bc = this._map.getBounds().getCenter();
+        var offset = this._map._getCenterOffset(e.center).multiplyBy(this._map._size.x).subtract( this._map._getMapPanePos());
+
+        console.log("offset :");
+        console.log(offset);
+        L.DomUtil.setTransform(this._canvas, offset.multiplyBy(-scale),scale);
+  */      // console.log("animate zoom " + offset + " scale :" + scale);
+
+        // this._canvas.style["transform"] = "translate(" + offset.x + "," + offset.y  + ") " + ' scale(' + scale + ')';
 
     }
 });
 
 
-(<any>L).pixiLayer = function (userDrawFunc? : GLPixLayer.UserDefinedDraw, options? : object) {
-    return new (<any>L).PixiLayer(userDrawFunc, options);
+(<any>L).pixiLayer = function ( options? : object) { // userDrawFunc? : GLPixLayer.UserDefinedDraw,
+    return new (<any>L).PixiLayer(options); // userDrawFunc,
 };

@@ -75,6 +75,13 @@ var App;
             this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
+                    var st = new Decorators.StarText();
+                    t.addChild(st);
+                    st.scale.set(4);
+                    st.init(t.properties.author);
+                    st.y = t.originalHeight;
+                    st.x = t.originalWidth / 2;
+                    st.name = "textarea";
                     tthis.currentTween = null;
                 }
             });
@@ -89,6 +96,9 @@ var App;
             if (v) {
                 this._context.removeChild(v);
             }
+            v = this._context.getChildByName("textarea");
+            if (v)
+                this._context.removeChild(v);
             this.removeGlowing();
         };
         TouchHightLightState.prototype.onTouchStart = function () {
@@ -150,6 +160,13 @@ var App;
             this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
+                    var st = new Decorators.StarText();
+                    t.addChild(st);
+                    st.scale.set(4);
+                    st.init("by " + t.properties.author);
+                    st.y = t.originalHeight;
+                    st.x = t.originalWidth / 2;
+                    st.name = "textarea";
                     tthis.currentTween = null;
                 }
             });
@@ -163,6 +180,11 @@ var App;
             var v = this._context.getChildByName("textContainer");
             if (v) {
                 this._context.removeChild(v);
+            }
+            v = this._context.getChildByName("textarea");
+            if (v) {
+                this._context.removeChild(v);
+                v.destroy();
             }
             this.removeGlowing();
         };
@@ -184,7 +206,8 @@ var App;
                 return t.scale.x;
             };
             t.layer.placeOnTop(t);
-            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.05,
+            this.currentTween = TweenLite.to(o, 0.5, {
+                setScale: 0.05,
                 ease: Power3.easeOut,
                 onComplete: function () {
                     tthis._context.setState(tthis.previousNormalState);
@@ -265,7 +288,7 @@ var App;
             smoothZoomDelay: 1000
         }).setView([45.7484600, 4.8467100], 13);
         var osmUrl = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
-        var osmAttrib = 'Map data � <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osmAttrib = 'Map data @ <a href="http://openstreetmap.org">OpenStreetMap</a> contributors & stamen.com tiles';
         var osm = new L.TileLayer(osmUrl, { minZoom: 0, maxZoom: 19, attribution: osmAttrib })
             .addTo(leafletMap);
         var glLayer = L.pixiLayer()
