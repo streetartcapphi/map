@@ -313,6 +313,10 @@ declare var TweenLite : gsap.TweenLite;
         var bounds : L.LatLngBounds  = this._map.getBounds();
         var zoomScale : number  = (size.x * 180) / (20037508.34  * (bounds.getEast() - bounds.getWest())); // resolution = 1/zoomScale
         var zoom : number = this._map.getZoom();
+        // remember the current center and zoom for animation
+        this._center = this._map.getCenter();
+        this._zoom = this._map.getZoom();
+        
 
         if (this._app && this._map && this._app.objectContainer) {
             var container = (<GLPixLayer.GLAPP>this._app).objectContainer;
@@ -347,20 +351,25 @@ declare var TweenLite : gsap.TweenLite;
 
 
 
-    _animateZoom: function (e : L.ZoomAnimEvent) {
+    _animateZoom: function (e: any) {
+        
+        var center = e.center;
+        var zoom = e.zoom;
 
 
-/*
-        var scale = this._map.getZoomScale(e.zoom);
-        var bc = this._map.getBounds().getCenter();
-        var offset = this._map._getCenterOffset(e.center).multiplyBy(this._map._size.x).subtract( this._map._getMapPanePos());
+        var scale = this._map.getZoomScale(zoom, this._zoom),
+        position = L.DomUtil.getPosition(this._canvas),
+        viewHalf = this._map._size.multiplyBy( 0.5),
+        currentCenterPoint = this._map.project(this._center, zoom),
+        destCenterPoint = this._map.project(center, zoom),
+        centerOffset = destCenterPoint.subtract(currentCenterPoint),
+        topLeftOffset = viewHalf.multiplyBy(-scale).add(position).add(viewHalf).subtract(centerOffset);
 
-        console.log("offset :");
-        console.log(offset);
-        L.DomUtil.setTransform(this._canvas, offset.multiplyBy(-scale),scale);
-  */      // console.log("animate zoom " + offset + " scale :" + scale);
-
-        // this._canvas.style["transform"] = "translate(" + offset.x + "," + offset.y  + ") " + ' scale(' + scale + ')';
+    if (L.Browser.any3d) {
+        L.DomUtil.setTransform(this._canvas, topLeftOffset, scale);
+    } else {
+        L.DomUtil.setPosition(this._canvas, topLeftOffset);
+    }
 
     }
 });

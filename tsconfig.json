@@ -8,8 +8,8 @@
      },
       "compileOnSave": true,
      "files": [
-       "GLPixLayer.ts",
-       "GLPixLayerElement.ts"
+       "GLPixiLayer.ts",
+       "GLPixiLayerElements.ts"
      ],
      "include": [
        "**/*.ts"

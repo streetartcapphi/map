@@ -19,11 +19,11 @@ declare namespace GLPixLayer {
 
 
   class GLElement extends PIXI.Sprite {
-    public lon : Number ;
-    public lat : Number ;
-    public properties : object;
+    public lon : number ;
+    public lat : number ;
+    public properties : Object;
     public timeline : gsap.TimelineLite;
-    public associatedScale : object;
+    public associatedScale : Object;
   }
 
 
