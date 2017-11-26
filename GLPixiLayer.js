@@ -116,40 +116,31 @@ L.PixiLayer = L.Layer.extend({
         c.interactive = true;
         c.properties = f.properties;
         sprite.name = "sprite";
-        c.addChild(sprite);
         c.layer = this;
         c.addChild(sprite);
         this._elements.push(c);
-        c.on("pointerover", function () {
-            if (c.hasState()) {
-                c.getState().onOver();
-            }
-        });
-        c.on("pointerout", function () {
-            if (c.hasState()) {
-                c.getState().onOut();
-            }
-        });
-        c.on("click", function () {
-            if (c.hasState()) {
-                c.getState().onClick();
-            }
-        });
-        c.on("touchstart", function () {
-            if (c.hasState()) {
-                c.getState().onTouchStart();
-            }
-        });
-        c.on("touchend", function () {
-            if (c.hasState()) {
-                c.getState().onTouchEnd();
-            }
-        });
-        c.on("touchendoutside", function () {
-            if (c.hasState()) {
-                c.getState().onTouchEndOutside();
-            }
-        });
+        var mmapping = {
+            "pointerover": "onOver",
+            "pointerout": "onOut",
+            "click": "onClick",
+            "touchstart": "onTouchStart",
+            "touchend": "onTouchEnd",
+            "touchendoutside": "onTouchEndOutside"
+        };
+        var _loop_1 = function () {
+            var eventName = "" + p;
+            var f_1 = function () {
+                if (c.hasState()) {
+                    var s = c.getState();
+                    var m = s[mmapping[eventName]];
+                    m.apply(s);
+                }
+            };
+            c.on(eventName, f_1);
+        };
+        for (var p in mmapping) {
+            _loop_1();
+        }
         c.setState = function (state) {
             if (c._state) {
                 c._state.onChanged();

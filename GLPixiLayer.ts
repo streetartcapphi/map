@@ -19,7 +19,7 @@ declare var TweenLite: gsap.TweenLite;
 
 (<any>L).PixiLayer = L.Layer.extend({
 
-    initialize: function (options?: object) { 
+    initialize: function (options?: Object) { 
         options = options || {
             zoomAnimation: false
         };
@@ -30,7 +30,7 @@ declare var TweenLite: gsap.TweenLite;
         return this;
     },
 
-    params: function (options: object) {
+    params: function (options: Object) {
         (<any>L).setOptions(this, options);
         return this;
     },
@@ -62,7 +62,7 @@ declare var TweenLite: gsap.TweenLite;
         return this;
     },
 
-    // init the pixi application
+    
 
     onAdd: function (map: L.Map) {
         this._map = map;
@@ -164,6 +164,7 @@ declare var TweenLite: gsap.TweenLite;
         }
 
         var texture: PIXI.Texture = PIXI.Texture.fromImage(image);
+
         var sprite: GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>(new PIXI.Sprite(texture));
 
         var c: GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
@@ -198,9 +199,6 @@ declare var TweenLite: gsap.TweenLite;
 
 
         sprite.name = "sprite";
-        c.addChild(sprite);
-
-
         c.layer = this;
 
         c.addChild(sprite);
@@ -210,50 +208,26 @@ declare var TweenLite: gsap.TweenLite;
 
         // add state behaviour
 
-        c.on("pointerover", () => {
-            if (c.hasState()) {
-                c.getState().onOver();
-            }
-        });
+        var mmapping : any = {
+            "pointerover" : "onOver",
+            "pointerout" : "onOut",
+            "click" : "onClick",
+            "touchstart" : "onTouchStart",
+            "touchend" : "onTouchEnd",
+            "touchendoutside" : "onTouchEndOutside"
+        }
 
-        c.on("pointerout", () => {
-            if (c.hasState()) {
-                c.getState().onOut();
-            }
-        });
-
-        c.on("click", () => {
-            if (c.hasState()) {
-                c.getState().onClick();
-            }
-        });
-
-        // touch
-        // .on('touchstart', onButtonDown)
-        // .on('touchend', onButtonUp)
-        // .on('touchendoutside', onButtonUp)
-        c.on("touchstart", () => {
-            if (c.hasState()) {
-                c.getState().onTouchStart();
-            }
-
-        });
-
-        c.on("touchend", () => {
-            if (c.hasState()) {
-                c.getState().onTouchEnd();
-            }
-
-
-        });
-
-        c.on("touchendoutside", () => {
-            if (c.hasState()) {
-                c.getState().onTouchEndOutside();
-            }
-
-
-        });
+        for (var p in mmapping) {
+            let eventName = "" + p;
+            let f = () => {
+                if (c.hasState()) {
+                    var s = c.getState();
+                    let m : Function = (<any>s)[mmapping[eventName]];
+                    m.apply(s);
+                }
+            };
+            c.on(eventName, f);
+        }
 
         // mixin
 
@@ -337,9 +311,9 @@ declare var TweenLite: gsap.TweenLite;
         var canvas = this._canvas;
         var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
 
-        if (pixiObject instanceof GLPixLayerElement.AnimatedGLElement) {
+        // if (pixiObject instanceof GLPixLayerElement.AnimatedGLElement) { // can't work because of the mixin
 
-            var a: GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
+            var a: GLPixLayerElement.AnimatedGLElement = <any>pixiObject;
             if (a.hasState()) {
                 // delegate position to state
                 a.getState().onReplaceElementOnContainer(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
@@ -347,7 +321,7 @@ declare var TweenLite: gsap.TweenLite;
                 // otherwise call the set position
                 a.setPosition(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
             }
-        }
+        // }
 
     },
 
@@ -377,6 +351,6 @@ declare var TweenLite: gsap.TweenLite;
 });
 
 
-(<any>L).pixiLayer = function (options?: object) {
+(<any>L).pixiLayer = function (options?: Object) {
     return new (<any>L).PixiLayer(options);
 };

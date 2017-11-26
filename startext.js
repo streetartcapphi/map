@@ -39,8 +39,10 @@ var Decorators;
             this.addChild(s);
             var timeline = new TimelineMax();
             timeline.add(TweenLite.to(textContainer, this.ti, { alpha: 0 }));
-            timeline.add(TweenLite.to(s, this.ti, { x: textSample.width + 3 * this.margin,
-                y: -textSample.height / 2, ease: Bounce.easeOut }));
+            timeline.add(TweenLite.to(s, this.ti, {
+                x: textSample.width + 3 * this.margin,
+                y: -textSample.height / 2, ease: Bounce.easeOut
+            }));
             timeline.add(TweenLite.to(textContainer, this.ti, { alpha: 1, ease: Power3.easeOut }), "=-" + this.ti);
             timeline.play();
             this.timeline = timeline;

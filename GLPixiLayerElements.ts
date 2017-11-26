@@ -1,19 +1,21 @@
-
+/// <reference path="GLPixiLayer.ts"/>
 
 module GLPixLayerElement {
 
-  class GLElement extends PIXI.Sprite {
+  
+  export class GLElement extends PIXI.Sprite {
     // lat / lon position of the element
-    public lon: Number;
-    public lat: Number;
-    public properties: object;
+    public lon: number;
+    public lat: number;
+    public properties: Object;
     public timeline: gsap.TimelineLite;
-    public associatedScale: object;
+    public associatedScale: Object;
   }
+
 
   // GLElement with an associated state (for animation)
   /**
-   * an anumated gl element is an extension of a glelement
+   * an animated gl element is an extension of a glelement
    containing a state object
    */
   export class AnimatedGLElement extends GLElement {
@@ -21,18 +23,20 @@ module GLPixLayerElement {
     public _state: State;
 
     public setState(state: State): void {
+        this._state = state;
     }
 
     public getState(): State {
-      return null;
+      return this._state;
     }
 
     public hasState(): boolean {
-      return true;
+      return this._state != null;
     }
 
     public setPosition(x: number, y: number): void {
-
+      this.x = x;
+      this.y = y;
     }
 
     public layer: any; // can't make a typed reference

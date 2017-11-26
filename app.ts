@@ -358,7 +358,7 @@ module App {
       o.getScale = function () {
         return t.scale.x;
       };
-
+ 
       // for z order
       (<GLPixLayer.GLPixLayer>t.layer).placeOnTop(t);
 

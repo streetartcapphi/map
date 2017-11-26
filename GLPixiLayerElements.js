@@ -12,20 +12,24 @@ var GLPixLayerElement;
         }
         return GLElement;
     }(PIXI.Sprite));
+    GLPixLayerElement.GLElement = GLElement;
     var AnimatedGLElement = (function (_super) {
         __extends(AnimatedGLElement, _super);
         function AnimatedGLElement() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
         AnimatedGLElement.prototype.setState = function (state) {
+            this._state = state;
         };
         AnimatedGLElement.prototype.getState = function () {
-            return null;
+            return this._state;
         };
         AnimatedGLElement.prototype.hasState = function () {
-            return true;
+            return this._state != null;
         };
         AnimatedGLElement.prototype.setPosition = function (x, y) {
+            this.x = x;
+            this.y = y;
         };
         return AnimatedGLElement;
     }(GLElement));

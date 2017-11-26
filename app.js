@@ -26,13 +26,19 @@ var App;
             os.getScale = function () {
                 return s.scale.x;
             };
-            this.glowTimeLine = new TimelineMax({ repeat: 10, onComplete: function () {
+            this.glowTimeLine = new TimelineMax({
+                repeat: 10, onComplete: function () {
                     this.restart();
-                } });
+                }
+            });
             var gspeed = 0.1;
-            this.glowTimeLine.to(os, gspeed, { setScale: gscale,
-                ease: Sine.easeIn }, gspeed).to(os, gspeed, { setScale: gscale / 3,
-                ease: Sine.easeOut });
+            this.glowTimeLine.to(os, gspeed, {
+                setScale: gscale,
+                ease: Sine.easeIn
+            }, gspeed).to(os, gspeed, {
+                setScale: gscale / 3,
+                ease: Sine.easeOut
+            });
         };
         BaseHightLightState.prototype.removeGlowing = function () {
             var g = this._context.getChildByName("glow");
@@ -67,7 +73,8 @@ var App;
             };
             t.layer.placeOnTop(t);
             var tthis = this;
-            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
+            this.currentTween = TweenLite.to(o, 0.5, {
+                setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
                     var st = new Decorators.StarText();
@@ -114,7 +121,8 @@ var App;
                 return t.scale.x;
             };
             t.layer.placeOnTop(t);
-            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.05,
+            this.currentTween = TweenLite.to(o, 0.5, {
+                setScale: 0.05,
                 ease: Power3.easeOut,
                 onComplete: function () {
                     tthis._context.setState(tthis.previousNormalState);
@@ -152,7 +160,8 @@ var App;
             };
             t.layer.placeOnTop(t);
             var tthis = this;
-            this.currentTween = TweenLite.to(o, 0.5, { setScale: 0.3,
+            this.currentTween = TweenLite.to(o, 0.5, {
+                setScale: 0.3,
                 ease: Power3.easeOut,
                 onComplete: function () {
                     var st = new Decorators.StarText();
@@ -240,13 +249,19 @@ var App;
             if (this.timeline) {
                 this.timeline.kill();
             }
-            this.timeline = new TimelineMax({ repeat: 10, onComplete: function () {
+            this.timeline = new TimelineMax({
+                repeat: 10, onComplete: function () {
                     this.restart();
-                } });
+                }
+            });
             var t = this._context;
-            this.timeline.to(t, this.speed, { y: t.y - this.randomJump,
-                ease: Bounce.easeIn }, Math.random()).to(t, this.speed, { y: t.y,
-                ease: Bounce.easeOut });
+            this.timeline.to(t, this.speed, {
+                y: t.y - this.randomJump,
+                ease: Bounce.easeIn
+            }, Math.random()).to(t, this.speed, {
+                y: t.y,
+                ease: Bounce.easeOut
+            });
         };
         NormalState.prototype.onChanged = function () {
             this.timeline.kill();
