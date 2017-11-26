@@ -15,39 +15,38 @@
  integration of PIXI objects , Patrice Freydiere 2017-05
 
 */
-declare var TweenLite : gsap.TweenLite;
+declare var TweenLite: gsap.TweenLite;
 
 (<any>L).PixiLayer = L.Layer.extend({
 
-    initialize: function ( options? : object) { // userDefinedDraw?: GLPixLayer.UserDefinedDraw,
-        // this._userDrawFunc = userDefinedDraw;
+    initialize: function (options?: object) { 
         options = options || {
-           zoomAnimation:false };
+            zoomAnimation: false
+        };
         (<any>L).setOptions(this, options);
     },
 
-    drawing: function () { //  userDrawFunc: GLPixLayer.UserDefinedDraw
-        // this._userDrawFunc = userDrawFunc;
+    drawing: function () { 
         return this;
     },
 
-    params:function(options : object) {
+    params: function (options: object) {
         (<any>L).setOptions(this, options);
         return this;
     },
 
-    canvas: function () : HTMLCanvasElement {
+    canvas: function (): HTMLCanvasElement {
         return this._canvas;
     },
 
-    objectContainer: function() {
+    objectContainer: function () {
         if (this._app) {
             return this._app.objectContainer;
         }
         return null;
     },
 
-    placeOnTop: function(element : GLPixLayer.GLElement) {
+    placeOnTop: function (element: GLPixLayer.GLElement) {
         var cont = this.objectContainer();
         if (cont) {
             cont.removeChild(element);
@@ -64,7 +63,8 @@ declare var TweenLite : gsap.TweenLite;
     },
 
     // init the pixi application
-    onAdd: function (map : L.Map) {
+
+    onAdd: function (map: L.Map) {
         this._map = map;
         this._canvas = L.DomUtil.create('canvas', 'leaflet-heatmap-layer');
 
@@ -80,15 +80,17 @@ declare var TweenLite : gsap.TweenLite;
 
         (<any>map)._panes.overlayPane.appendChild(this._canvas);
 
+        //
         // create the pixi context
         //
 
-        var app : GLPixLayer.GLAPP = <GLPixLayer.GLAPP>new PIXI.Application(this._canvas.clientWidth,
-                                        this._canvas.clientHeight,
-                                        {
-                                            view: this._canvas,
-                                            transparent: true
-                                        });
+        var app: GLPixLayer.GLAPP = <GLPixLayer.GLAPP>new PIXI.Application(this._canvas.clientWidth,
+            this._canvas.clientHeight,
+            {
+                view: this._canvas,
+                transparent: true
+            });
+        
         app.start();
         this._app = app;
 
@@ -107,7 +109,7 @@ declare var TweenLite : gsap.TweenLite;
         // events
 
         map.on('moveend', this._reset, this);
-        map.on('resize',  this._resize, this);
+        map.on('resize', this._resize, this);
 
         if (map.options.zoomAnimation && L.Browser.any3d) {
             map.on('zoomanim', this._animateZoom, this);
@@ -116,7 +118,7 @@ declare var TweenLite : gsap.TweenLite;
         this._reset();
     },
 
-    _updateContainerPos: function() {
+    _updateContainerPos: function () {
         var app = this._app;
         var container = app.objectContainer;
 
@@ -124,9 +126,10 @@ declare var TweenLite : gsap.TweenLite;
         container.y = (app.renderer.height - container.height) / 2;
     },
 
-    onRemove: function (map : L.Map) {
+    onRemove: function (map: L.Map) {
 
         if (this._app) {
+            // destroy app
             this._app.stop();
             this._app.destroy(false);
             this._app = null;
@@ -141,162 +144,159 @@ declare var TweenLite : gsap.TweenLite;
             map.off('zoomanim', this._animateZoom, this);
         }
 
-
-
         this._canvas = null;
-
     },
 
-    addAnimatedElement:function(f : GeoJSON.Feature<GeoJSON.Point>) : JQueryPromise< GLPixLayerElement.AnimatedGLElement> {
-      // checks on elements
+    addAnimatedElement: function (f: GeoJSON.Feature<GeoJSON.Point>): JQueryPromise<GLPixLayerElement.AnimatedGLElement> {
+        // checks on elements
 
-      var lon = f.geometry && f.geometry.coordinates[0];
-      var lat = f.geometry && f.geometry.coordinates[1];
+        var lon = f.geometry && f.geometry.coordinates[0];
+        var lat = f.geometry && f.geometry.coordinates[1];
 
-      if (!f.properties) {
-        throw new Error("geojson element must have non null properties");
-      }
+        if (!f.properties) {
+            throw new Error("geojson element must have non null properties");
+        }
 
-      var image = (<any>f.properties)['imageURL'];
+        var image = (<any>f.properties)['imageURL'];
 
-      if (!image) {
-         throw new Error("image must have an imageURL property");
-      }
+        if (!image) {
+            throw new Error("image must have an imageURL property");
+        }
 
-      var texture : PIXI.Texture = PIXI.Texture.fromImage(image);
-      var sprite : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement> (new PIXI.Sprite(texture));
+        var texture: PIXI.Texture = PIXI.Texture.fromImage(image);
+        var sprite: GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>(new PIXI.Sprite(texture));
 
-      var c : GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
-      c.interactive = true;
+        var c: GLPixLayerElement.AnimatedGLElement = <any>new PIXI.Container();
+        c.interactive = true;
 
-      var promise = $.Deferred();
-      var tthis = this;
+        var promise = $.Deferred<GLPixLayerElement.AnimatedGLElement>();
+        var tthis = this;
 
-      //called when the texture is loaded
-      function updateSize() {
+        //called when the texture is loaded
+        function updateSize() {
 
-          c.scale.set(0.05);
-          c.originalWidth = texture.baseTexture.width;
-          c.originalHeight = texture.baseTexture.height;
-          // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
+            c.scale.set(0.05);
+            c.originalWidth = texture.baseTexture.width;
+            c.originalHeight = texture.baseTexture.height;
+            // console.log(sprite.originalWidth + " x " + sprite.originalHeight);
             promise.resolve(c);
-          tthis._app.objectContainer.addChild(c);
+            tthis._app.objectContainer.addChild(c);
 
-      }
-
-      if (texture.baseTexture.hasLoaded) {
-          //console.log("hasloaded");
-          updateSize();
-      } else {
-          texture.baseTexture.addListener("update", updateSize);
-      }
-
-      c.lon = lon;
-      c.lat = lat;
-      c.interactive = true;
-      c.properties = f.properties;
-
-
-      sprite.name="sprite";
-      c.addChild(sprite);
-
-
-      c.layer = this;
-
-      c.addChild(sprite);
-
-      this._elements.push(c); // remember all elements
-
-
-      // add state behaviour
-
-      c.on("pointerover", ()=>{
-          if (c.hasState()) {
-            c.getState().onOver();
-          }
-      });
-
-      c.on("pointerout", ()=>{
-          if (c.hasState()) {
-            c.getState().onOut();
-          }
-      });
-
-      c.on("click", ()=> {
-        if (c.hasState()) {
-          c.getState().onClick();
-        }
-      });
-
-      // touch
-      // .on('touchstart', onButtonDown)
-            // .on('touchend', onButtonUp)
-            // .on('touchendoutside', onButtonUp)
-      c.on("touchstart", () => {
-        if (c.hasState()) {
-          c.getState().onTouchStart();
         }
 
-      });
-
-      c.on("touchend", () => {
-        if (c.hasState()) {
-          c.getState().onTouchEnd();
+        if (texture.baseTexture.hasLoaded) {
+            //console.log("hasloaded");
+            updateSize();
+        } else {
+            texture.baseTexture.addListener("update", updateSize);
         }
 
+        c.lon = lon;
+        c.lat = lat;
+        c.interactive = true; // to be able to listen events
+        c.properties = f.properties;
 
-      });
 
-      c.on("touchendoutside", () => {
-        if (c.hasState()) {
-          c.getState().onTouchEndOutside();
+        sprite.name = "sprite";
+        c.addChild(sprite);
+
+
+        c.layer = this;
+
+        c.addChild(sprite);
+
+        this._elements.push(c); // remember all elements
+
+
+        // add state behaviour
+
+        c.on("pointerover", () => {
+            if (c.hasState()) {
+                c.getState().onOver();
+            }
+        });
+
+        c.on("pointerout", () => {
+            if (c.hasState()) {
+                c.getState().onOut();
+            }
+        });
+
+        c.on("click", () => {
+            if (c.hasState()) {
+                c.getState().onClick();
+            }
+        });
+
+        // touch
+        // .on('touchstart', onButtonDown)
+        // .on('touchend', onButtonUp)
+        // .on('touchendoutside', onButtonUp)
+        c.on("touchstart", () => {
+            if (c.hasState()) {
+                c.getState().onTouchStart();
+            }
+
+        });
+
+        c.on("touchend", () => {
+            if (c.hasState()) {
+                c.getState().onTouchEnd();
+            }
+
+
+        });
+
+        c.on("touchendoutside", () => {
+            if (c.hasState()) {
+                c.getState().onTouchEndOutside();
+            }
+
+
+        });
+
+        // mixin
+
+        c.setState = (state: GLPixLayerElement.State): void => {
+            if (c._state) {
+                c._state.onChanged();
+                c._state = null;
+            }
+            c._state = state;
         }
 
-
-      });
-
-      // mixin
-
-      c.setState = (state : GLPixLayerElement.State) : void => {
-        if (c._state) {
-          c._state.onChanged();
-          c._state = null;
+        c.getState = (): GLPixLayerElement.State => {
+            return c._state;
         }
-        c._state = state;
-      }
+        c.hasState = (): boolean => {
+            return c._state != null && !(typeof c._state === 'undefined');
+        }
 
-      c.getState = () : GLPixLayerElement.State => {
-        return c._state;
-      }
-      c.hasState = () : boolean => {
-        return c._state != null && !(typeof c._state === 'undefined');
-      }
+        c.setPosition = (x: number, y: number): void => {
+            c.x = x;
+            c.y = y;
+        };
 
-      c.setPosition = (x:number, y:number) : void => {
-        c.x = x;
-        c.y = y;
-      };
+        c.setState(null);
 
-      c.setState(null);
+        this._adjustSpritePosition(c);
 
-      this._adjustSpritePosition(c);
-
-      return promise.promise();
+        return promise.promise();
     },
 
 
-    addTo: function (map:L.Map) {
+    addTo: function (map: L.Map) {
         map.addLayer(this);
         return this;
     },
 
-    _resize: function (resizeEvent : L.ResizeEvent) {
-        this._canvas.width  = resizeEvent.newSize.x;
+    _resize: function (resizeEvent: L.ResizeEvent) {
+        this._canvas.width = resizeEvent.newSize.x;
         this._canvas.height = resizeEvent.newSize.y;
         if (this._app) {
             var renderer = this._app.renderer;
             renderer.resize(this._canvas.clientWidth,
-                            this._canvas.clientHeight);
+                this._canvas.clientHeight);
             this._updateContainerPos();
         }
     },
@@ -309,21 +309,21 @@ declare var TweenLite : gsap.TweenLite;
 
     _redraw: function () {
 
-        var size   : L.Point  = this._map.getSize();
-        var bounds : L.LatLngBounds  = this._map.getBounds();
-        var zoomScale : number  = (size.x * 180) / (20037508.34  * (bounds.getEast() - bounds.getWest())); // resolution = 1/zoomScale
-        var zoom : number = this._map.getZoom();
+        var size: L.Point = this._map.getSize();
+        var bounds: L.LatLngBounds = this._map.getBounds();
+        var zoomScale: number = (size.x * 180) / (20037508.34 * (bounds.getEast() - bounds.getWest())); // resolution = 1/zoomScale
+        var zoom: number = this._map.getZoom();
         // remember the current center and zoom for animation
         this._center = this._map.getCenter();
         this._zoom = this._map.getZoom();
-        
+
 
         if (this._app && this._map && this._app.objectContainer) {
             var container = (<GLPixLayer.GLAPP>this._app).objectContainer;
             // move the children
             for (var i in container.children) {
-                  var s = container.children[i];
-                  this._adjustSpritePosition(s);
+                var s = container.children[i];
+                this._adjustSpritePosition(s);
             }
             this._app.render();
         }
@@ -331,50 +331,52 @@ declare var TweenLite : gsap.TweenLite;
         this._frame = null;
     },
 
-    _adjustSpritePosition: function(pixiObject:GLPixLayer.GLElement) {
 
-          var canvas = this._canvas;
-          var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
+    _adjustSpritePosition: function (pixiObject: GLPixLayer.GLElement) {
 
+        var canvas = this._canvas;
+        var dot = this._map.latLngToContainerPoint([pixiObject.lat, pixiObject.lon]);
 
-              var a : GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
-              if (a.hasState()) {
+        if (pixiObject instanceof GLPixLayerElement.AnimatedGLElement) {
+
+            var a: GLPixLayerElement.AnimatedGLElement = <GLPixLayerElement.AnimatedGLElement>pixiObject;
+            if (a.hasState()) {
                 // delegate position to state
-                a.getState().onReplaceElementOnContainer(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
-              } else {
-                a.setPosition(dot.x - canvas.clientWidth/2, dot.y - canvas.clientHeight/2);
-              }
-
+                a.getState().onReplaceElementOnContainer(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
+            } else {
+                // otherwise call the set position
+                a.setPosition(dot.x - canvas.clientWidth / 2, dot.y - canvas.clientHeight / 2);
+            }
+        }
 
     },
 
-
-
-
+    /**
+     * called when a zoom is made on the layer
+     */
     _animateZoom: function (e: any) {
-        
+
         var center = e.center;
         var zoom = e.zoom;
 
-
         var scale = this._map.getZoomScale(zoom, this._zoom),
-        position = L.DomUtil.getPosition(this._canvas),
-        viewHalf = this._map._size.multiplyBy( 0.5),
-        currentCenterPoint = this._map.project(this._center, zoom),
-        destCenterPoint = this._map.project(center, zoom),
-        centerOffset = destCenterPoint.subtract(currentCenterPoint),
-        topLeftOffset = viewHalf.multiplyBy(-scale).add(position).add(viewHalf).subtract(centerOffset);
+            position = L.DomUtil.getPosition(this._canvas),
+            viewHalf = this._map._size.multiplyBy(0.5),
+            currentCenterPoint = this._map.project(this._center, zoom),
+            destCenterPoint = this._map.project(center, zoom),
+            centerOffset = destCenterPoint.subtract(currentCenterPoint),
+            topLeftOffset = viewHalf.multiplyBy(-scale).add(position).add(viewHalf).subtract(centerOffset);
 
-    if (L.Browser.any3d) {
-        L.DomUtil.setTransform(this._canvas, topLeftOffset, scale);
-    } else {
-        L.DomUtil.setPosition(this._canvas, topLeftOffset);
-    }
+        if (L.Browser.any3d) {
+            L.DomUtil.setTransform(this._canvas, topLeftOffset, scale);
+        } else {
+            L.DomUtil.setPosition(this._canvas, topLeftOffset);
+        }
 
     }
 });
 
 
-(<any>L).pixiLayer = function ( options? : object) { // userDrawFunc? : GLPixLayer.UserDefinedDraw,
-    return new (<any>L).PixiLayer(options); // userDrawFunc,
+(<any>L).pixiLayer = function (options?: object) {
+    return new (<any>L).PixiLayer(options);
 };
